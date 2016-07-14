@@ -1,3 +1,3 @@
-export enum GranularityEnum{
+export enum GranularityEnum {
     M5
 }

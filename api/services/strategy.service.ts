@@ -1,9 +1,6 @@
 import * as api from '../../api';
 
 export class StrategyService {
-
-    constructor() { }
-
     public create(strategy: api.Strategy): api.Strategy {
         let model = new api.StrategyModel(strategy);
 
