@@ -1,5 +1,5 @@
 export interface Strategy {
-    id: string;
+    id?: string | number;
     name: string;
     description: string;
     createdTime: string;

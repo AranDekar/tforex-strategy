@@ -1,22 +1,15 @@
-import { Mongoose, Schema, Document } from 'mongoose';
+import { Document, Schema } from 'mongoose';
 
 import * as api from '../../api';
 
-let mongoose = new Mongoose();
-mongoose.connect('mongodb://localhost/tforex-strategy');
 
-interface StrategyEntity {
-    name: string;
-    description: string;
-    createdTime: Date;
-    isActive: boolean;
-    granularity: api.GranularityEnum;
+let mongoose = api.DataAccess.mongooseInstance;
 
-    suspend();
+interface StrategyOperation {
+    suspend(): void;
 }
 
-interface StrategyDocument extends StrategyEntity, Document { }
-
+interface StrategyModel extends api.Strategy, StrategyOperation, Document { }
 
 let schema = new Schema({
     name: { type: String, trim: true, required: 'name is required' },
@@ -30,5 +23,4 @@ schema.methods.suspend = () => {
     this.isActive = false;
 };
 
-export let StrategyModel = mongoose.model<StrategyDocument>('Strategy', schema);
-// export let StrategyModel = mongoose.model('Strategy', schema);
+export let StrategyModel = mongoose.model<StrategyModel>('strategy', schema);

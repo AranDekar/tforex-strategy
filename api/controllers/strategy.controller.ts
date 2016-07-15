@@ -1,23 +1,20 @@
 import * as api from '../../api';
 
-export function get(req, res) {
+export async function get(req, res) {
     // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-    // let _id = req.swagger.params._id.value;
-    let result = {
-        createdTime: new Date().toISOString(),
-        description: 'test',
-        granularity: api.GranularityEnum[api.GranularityEnum.M5],
-        id: '1',
-        isActive: true,
-        name: 'test',
-    };
-    // this sends back a JSON response which is a single string
-    res.json([result]);
+    // let _id = req.swagger.params._id.value;    
+    try {
+        let service = new api.StrategyService();
+        let data = await service.get();
+        res.json(data);
+    } catch (err) {
+        throw new Error(err);
+    }
 }
 
-export function post(req, res) {
+export async function post(req, res) {
     // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
     let service = new api.StrategyService();
-    let result = service.create(req.body);
-    res.json([result]);
+    let result = await service.create(req.body);
+    res.json(result);
 }
