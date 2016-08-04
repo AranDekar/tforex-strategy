@@ -9,7 +9,7 @@ interface StrategyOperation {
     suspend(): void;
 }
 
-interface StrategyModel extends api.Strategy, StrategyOperation, Document { }
+export interface StrategyModel extends api.Strategy, StrategyOperation, Document { }
 
 let schema = new Schema({
     name: { type: String, trim: true, required: 'name is required' },
@@ -23,4 +23,4 @@ schema.methods.suspend = () => {
     this.isActive = false;
 };
 
-export let StrategyModel = mongoose.model<StrategyModel>('strategy', schema);
+export let strategyModel = mongoose.model<StrategyModel>('strategy', schema);
