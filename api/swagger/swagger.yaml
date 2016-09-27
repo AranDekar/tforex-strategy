@@ -22,11 +22,13 @@ securityDefinitions:
   api_key:
     type: apiKey
     in: header
-    name: api_key
+    name: api-key
 paths:
   /strategies:
     x-swagger-router-controller: strategy.controller
     get:
+      security:
+        - api_key: []
       description: Returns a list of available strategies
       produces:
         - application/json

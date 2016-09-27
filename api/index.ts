@@ -1,3 +1,4 @@
+export * from './helpers/app-settings';
 export * from './helpers/db/data-access';
 export * from './controllers/strategy.controller';
 export * from './enums/granularity.enum';
