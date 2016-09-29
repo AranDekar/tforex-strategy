@@ -5,4 +5,5 @@ export interface Strategy {
     createdTime: string;
     isActive: boolean;
     granularity: string;
+    postedBy: string | number;
 }

@@ -15,6 +15,7 @@ export async function get(req, res) {
                 description: item.description,
                 granularity: item.granularity,
                 isActive: item.isActive,
+                postedBy: item.postedBy,
             });
         }
         res.json(result);
@@ -34,6 +35,7 @@ export async function post(req, res) {
         description: model.description,
         granularity: model.granularity,
         isActive: model.isActive,
+        postedBy: model.postedBy,
     };
     res.json(data);
 }

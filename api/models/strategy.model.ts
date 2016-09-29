@@ -17,6 +17,7 @@ let schema = new Schema({
     createdTime: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
     granularity: { type: String, default: 'M5', enum: ['M1', 'M5', 'M15', 'M30', 'H1', 'H4'], required: 'granularity is required' },
+    postedBy: { type: Schema.Types.ObjectId, required: 'postedBy is required' },
 });
 
 schema.methods.suspend = () => {

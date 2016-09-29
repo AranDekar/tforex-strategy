@@ -107,6 +107,7 @@ definitions:
       - createdTime
       - isActive
       - granularity
+      - postedBy
     properties:
       id:
         type: string
@@ -128,6 +129,8 @@ definitions:
           - H1
           - H4
           - D1
+      postedBy:
+        type: string
   HelloWorldResponse:
     required:
       - message
