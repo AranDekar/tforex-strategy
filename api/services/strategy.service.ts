@@ -1,7 +1,7 @@
 import * as api from '../../api';
 
 export class StrategyService {
-    public async get(id: string = null): Promise<api.StrategyModel[]> {
+    public async get(id: string | null = null): Promise<api.StrategyModel[]> {
         let result: api.Strategy[] = [];
         let data = await api.strategyModel.find({}).exec();
         return data;
