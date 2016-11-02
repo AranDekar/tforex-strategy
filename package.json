@@ -13,7 +13,7 @@
     "kafka-node": "^1.0.1",
     "mongodb": "^2.2.10",
     "mongoose": "^4.6.4",
-    "swagger-express-mw": "^0.1.0"
+    "swagger-express-mw": "^0.7.0"
   },
   "devDependencies": {
     "@types/kafka-node": "^0.2.32",
