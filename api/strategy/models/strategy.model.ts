@@ -1,15 +1,19 @@
 import { Document, Schema } from 'mongoose';
-
-import * as api from '../../api';
-
+import * as api from '../../../api';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
-interface StrategyOperation {
-    suspend(): void;
+export interface Strategy {
+    name: string;
+    description: string;
+    createdTime: string;
+    isActive: boolean;
+    granularity: string;
+    postedBy: string | number;
 }
 
-export interface StrategyModel extends api.Strategy, StrategyOperation, Document { }
+export interface StrategyDocument extends api.Strategy, Document {
+}
 
 let schema = new Schema({
     name: { type: String, trim: true, required: 'name is required' },
@@ -20,8 +24,4 @@ let schema = new Schema({
     postedBy: { type: Schema.Types.ObjectId, required: 'postedBy is required' },
 });
 
-schema.methods.suspend = () => {
-    this.isActive = false;
-};
-
-export let strategyModel = mongoose.model<StrategyModel>('strategy', schema);
+export let strategyModel = mongoose.model<StrategyDocument>('strategy', schema);

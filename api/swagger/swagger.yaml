@@ -108,6 +108,7 @@ definitions:
       - isActive
       - granularity
       - postedBy
+      - instruments
     properties:
       id:
         type: string
@@ -131,6 +132,10 @@ definitions:
           - D1
       postedBy:
         type: string
+      instruments:
+        type: array
+        items:
+          type: string
   HelloWorldResponse:
     required:
       - message
