@@ -16,6 +16,8 @@ export class Config {
                 strategy_base_path: 'http://localhost:10020',
                 instrument_base_path: 'http://localhost:1040',
                 api_key: '1234',
+                kafka_conn_string: 'localhost:2181/',
+                candle_history_client_id: 'candle-history',
             };
         }
         return this.settings;
@@ -31,4 +33,6 @@ interface AppSettings {
     strategy_base_path: string;
     instrument_base_path: string;
     api_key: string;
+    kafka_conn_string: string;
+    candle_history_client_id: string;
 }

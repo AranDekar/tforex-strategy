@@ -1,7 +1,7 @@
 import * as api from '../../strategy';
 
 export class StrategyService {
-    public async get(id: string | null = null): Promise<api.StrategyDocument[]> {
+    public async get(id: string | number | null = null): Promise<api.StrategyDocument[]> {
         if (id) {
             return await api.strategyModel.find({ id: id }).exec();
         } else {

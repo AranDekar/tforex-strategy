@@ -10,13 +10,13 @@
   "dependencies": {
     "cors": "^2.8.1",
     "express": "^4.12.3",
-    "kafka-node": "^1.1.0",
+    "kafka-node": "^1.3.0",
     "mongodb": "^2.2.19",
     "mongoose": "^4.7.6",
     "swagger-express-mw": "^0.7.0"
   },
   "devDependencies": {
-    "@types/kafka-node": "^0.2.32",
+    "@types/kafka-node": "^0.2.35",
     "@types/mongodb": "^2.1.33",
     "@types/mongoose": "^4.5.38",
     "@types/node": "^6.0.45",
