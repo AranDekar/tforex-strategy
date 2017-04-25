@@ -1,6 +1,6 @@
-import * as api from '../../../../api';
+import * as api from '../../../../../api';
 
-export class ProxyBaseService {
+export class BaseProxy {
     protected basePath = '';
     protected defaultHeaders: any = {};
     protected _useQuerystring: boolean = false;

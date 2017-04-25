@@ -4,7 +4,7 @@ import * as api from '../../../api';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
-export interface StrategyProcessQuery {
+export interface StrategyQuery {
     strategyId: string | number;
     instrumentId: string | number;
     status: string;
@@ -12,7 +12,7 @@ export interface StrategyProcessQuery {
     pips: number;
 }
 
-export interface StrategyProcessQueryDocument extends api.StrategyProcessQuery, Document {
+export interface StrategyQueryDocument extends api.StrategyQuery, Document {
 }
 
 let schema = new Schema({
@@ -23,4 +23,4 @@ let schema = new Schema({
     pips: { type: String, required: 'time is required' },
 });
 
-export let strategyProcessQueryModel = mongoose.model<StrategyProcessQueryDocument>('strategyprocessquery', schema);
+export let strategyQueryModel = mongoose.model<StrategyQueryDocument>('strategy_query', schema);

@@ -3,25 +3,23 @@ import * as api from '../../../api';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
-export interface StrategyProcessEvent {
+export interface StrategyBacktestEvent {
     strategyId: string | number;
-    instrumentId: string | number;
     isDispatched: boolean;
     time: string;
     event: string;
     payload: any;
 }
 
-export interface StrategyProcessEventDocument extends api.StrategyProcessEvent, Document {
+export interface StrategyBacktestEventDocument extends StrategyBacktestEvent, Document {
 }
 
 let schema = new Schema({
     strategyId: { type: Schema.Types.ObjectId },
-    instrumentId: { type: Schema.Types.ObjectId },
     isDispatched: { type: Boolean, default: false },
     time: { type: String },
     event: { type: String, enum: ['in', 'out', 'pending'] },
     payload: { type: Schema.Types.Mixed },
 });
 
-export let strategyProcessEventModel = mongoose.model<StrategyProcessEventDocument>('strategyprocessevent', schema);
+export let strategyBAcktestEventModel = mongoose.model<StrategyBacktestEventDocument>('strategy_backtest_event', schema);

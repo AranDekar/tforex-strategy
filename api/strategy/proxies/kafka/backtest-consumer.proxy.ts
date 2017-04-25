@@ -1,16 +1,27 @@
 import * as kafka from 'kafka-node';
+import * as rx from 'rxjs';
 
-import * as api from '../../../api';
+import * as api from '../../../../api';
 
-export class StrategyProcessMessageConsumerService {
-    private static _consumer: kafka.Consumer;
-    public static backtest(topic: string) {
+export class BacktestProxy {
+    private _consumer: kafka.Consumer;
+    private _onNewCandleReceived$: rx.BehaviorSubject<api.Candle>;
+
+    public get onNewCandleReceived$() {
+        return this._onNewCandleReceived$.asObservable();
+    }
+
+    constructor() {
+        this._onNewCandleReceived$ = <rx.BehaviorSubject<api.Candle>>new rx.BehaviorSubject({});
+    }
+
+    public backtest(topic: string) {
         let client = new kafka.Client(
             api.Config.settings.kafka_conn_string,
             api.Config.settings.candle_history_client_id);
-        StrategyProcessMessageConsumerService._consumer = new kafka.Consumer(
+        this._consumer = new kafka.Consumer(
             client, [
-                { topic: topic, partition: 0 },
+                { topic: topic },
             ], {
                 autoCommit: true,
                 groupId: api.Config.settings.candle_history_client_id,
@@ -19,16 +30,15 @@ export class StrategyProcessMessageConsumerService {
 
         // if you don't see any message coming, it may be because you have deleted the topic and the offset 
         // is not reset with this client id.
-        StrategyProcessMessageConsumerService._consumer.on('message', async (message: any) => {
+        this._consumer.on('message', async (message: any) => {
             if (message && message.value) {
                 let item = JSON.parse(message.value);
                 if (item.event) {
-                    let processService = new api.StrategyProcessService();
-                    processService.process(item);
+                    this._onNewCandleReceived$.next(item.event);
                 }
             }
         });
-        StrategyProcessMessageConsumerService._consumer.on('error', (err: string) => {
+        this._consumer.on('error', (err: string) => {
             console.log(err);
         });
     }

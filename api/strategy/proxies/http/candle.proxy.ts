@@ -1,9 +1,9 @@
 import * as http from 'http';
 import * as request from 'request';
 
-import * as api from '../../../api';
+import * as api from '../../../../api';
 
-export class CandleProxyService extends api.ProxyBaseService {
+export class CandleProxy extends api.BaseProxy {
     constructor() {
         super(api.Config.settings.instrument_base_path);
     }
