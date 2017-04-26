@@ -18,7 +18,7 @@ let schema = new Schema({
     strategyId: { type: Schema.Types.ObjectId },
     isDispatched: { type: Boolean, default: false },
     time: { type: String },
-    event: { type: String, enum: ['in', 'out', 'pending'] },
+    event: { type: String, enum: ['running', 'done' ] },
     payload: { type: Schema.Types.Mixed },
 });
 
