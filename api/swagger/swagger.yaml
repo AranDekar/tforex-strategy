@@ -27,6 +27,8 @@ paths:
   /strategies:
     x-swagger-router-controller: strategy.controller
     get:
+      tags: 
+        - strategy
       security:
         - api_key: []
       description: Returns a list of available strategies
@@ -51,6 +53,10 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
     post:
+      tags: 
+        - strategy
+      security:
+        - api_key: []
       description: adds a new strategy
       produces:
         - application/json
@@ -67,7 +73,37 @@ paths:
           description: OK - created successfully
           schema: 
             $ref: "#/definitions/Strategy"
-    
+  /strategies/backtest:
+    x-swagger-router-controller: strategy.controller
+    post:
+      tags: 
+        - strategy
+      security:
+        - api_key: []
+      description: starts backtesting a strategy
+      operationId: backtest
+      parameters:
+        - name: instrument
+          description: the instrument in which the stratgey is backtested
+          in: query
+          required: true
+          type: string
+          enum:
+            - AUD_USD
+        - name: strategy
+          description: the strategy to be backtested
+          type: string
+          in: query
+          required: true
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EventResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /hello:
     # binds a127 app logic to a route
     x-swagger-router-controller: hello_world
@@ -137,6 +173,12 @@ definitions:
         items:
           type: string
   HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  EventResponse:
     required:
       - message
     properties:
