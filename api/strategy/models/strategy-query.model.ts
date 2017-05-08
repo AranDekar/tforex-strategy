@@ -12,7 +12,7 @@ export interface StrategyQuery {
     pips: number;
 }
 
-export interface StrategyQueryDocument extends api.StrategyQuery, Document {
+export interface StrategyQueryDocument extends api.Model.StrategyQuery, Document {
 }
 
 let schema = new Schema({

@@ -1,16 +1,16 @@
 import * as api from '../../strategy';
 
 export class StrategyService {
-    public async get(id: string | number | null = null): Promise<api.StrategyDocument[]> {
+    public async get(id: string | number | null = null): Promise<api.Model.StrategyDocument[]> {
         if (id) {
-            return await api.strategyModel.find({ id: id }).exec();
+            return await api.Model.strategyModel.find({ id: id }).exec();
         } else {
-            return await api.strategyModel.find().exec();
+            return await api.Model.strategyModel.find().exec();
         }
     }
 
-    public async create(strategy: api.Strategy): Promise<api.StrategyDocument> {
-        let model = new api.strategyModel(strategy);
+    public async create(strategy: api.Model.Strategy): Promise<api.Model.StrategyDocument> {
+        let model = new api.Model.strategyModel(strategy);
         await model.save();
         return model;
     }
@@ -25,7 +25,7 @@ export class StrategyService {
         let strategy = strategies[0];
         let topic = strategy.name.concat(api.InstrumentEnum[instrument]);
         // listen to the messages that are to come from candle service to backtest
-        let kafkaConsumer = new api.BacktestProxy();
+        let kafkaConsumer = new api.BacktestConsumerProxy();
         kafkaConsumer.onNewCandleReceived$.subscribe(
             candle => {
                 return;

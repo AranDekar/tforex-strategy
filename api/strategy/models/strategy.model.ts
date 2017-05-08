@@ -12,7 +12,7 @@ export interface Strategy {
     postedBy: string | number;
 }
 
-export interface StrategyDocument extends api.Strategy, Document {
+export interface StrategyDocument extends api.Model.Strategy, Document {
 }
 
 let schema = new Schema({

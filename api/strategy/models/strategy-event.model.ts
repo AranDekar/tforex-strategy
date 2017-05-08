@@ -12,7 +12,7 @@ export interface StrategyEvent {
     payload: any;
 }
 
-export interface StrategyEventDocument extends api.StrategyEvent, Document {
+export interface StrategyEventDocument extends api.Model.StrategyEvent, Document {
 }
 
 let schema = new Schema({

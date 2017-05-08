@@ -3,7 +3,7 @@ import * as rx from 'rxjs';
 
 import * as api from '../../../../api';
 
-export class BacktestProxy {
+export class BacktestConsumerProxy {
     private _consumer: kafka.Consumer;
     private _onNewCandleReceived$: rx.BehaviorSubject<api.Candle>;
 
