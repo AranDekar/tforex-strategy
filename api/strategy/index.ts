@@ -1,6 +1,3 @@
-import * as Model from './models';
-export { Model }
-
 export * from './shared/app-settings';
 export * from './shared/data-access';
 export * from './enums/granularity.enum';
@@ -8,6 +5,9 @@ export * from './enums/instrument.enum';
 
 export * from './interfaces/candle.interface';
 export * from './interfaces/event-response.interface';
+
+import * as Model from './models';
+export { Model }
 
 export * from './proxies/http/shared/authentication.interface';
 export * from './proxies/http/shared/http-basic-auth.service';

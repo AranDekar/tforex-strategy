@@ -1,6 +1,6 @@
 import { Document, Schema, Model, Types } from 'mongoose';
 
-import * as api from '../../../api';
+import * as api from '../../strategy';
 
 let mongoose = api.DataAccess.mongooseInstance;
 

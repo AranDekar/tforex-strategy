@@ -1,5 +1,7 @@
 import { Mongoose } from "mongoose";
 
+import * as api from '../../strategy';
+
 export class DataAccess {
     public static mongooseInstance: Mongoose;
 
@@ -14,7 +16,7 @@ export class DataAccess {
         this.mongooseInstance.connection.once("open", () => {
             console.log("Conected to mongodb.");
         });
-        this.mongooseInstance.connect('mongodb://localhost/tforex');
+        this.mongooseInstance.connect(api.Config.settings.mongo_db_connection_string);
         return this.mongooseInstance;
     }
 

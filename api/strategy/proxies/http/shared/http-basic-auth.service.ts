@@ -1,6 +1,6 @@
 import * as request from 'request';
 
-import * as api from '../../../../../api';
+import * as api from '../../../../strategy';
 
 export class HttpBasicAuthService implements api.Authentication {
     public username: string;

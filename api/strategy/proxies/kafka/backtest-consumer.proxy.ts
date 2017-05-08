@@ -1,7 +1,7 @@
 import * as kafka from 'kafka-node';
 import * as rx from 'rxjs';
 
-import * as api from '../../../../api';
+import * as api from '../../../strategy';
 
 export class BacktestConsumerProxy {
     private _consumer: kafka.Consumer;
