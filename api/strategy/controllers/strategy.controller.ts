@@ -26,8 +26,8 @@ export async function backtest(req, res, next) {
         throw new Error('input arguments are not passed correctly!');
     }
     try {
-        let srv = new api.StrategyProcessService();
-        await srv.start(body.strategy, body.instrument);
+        let srv = new api.StrategyService();
+        await srv.backtest(body.strategy, body.instrument);
         res.json(`backtesting strategy...`);
     } catch (err) {
         res.statusCode = 500; // internal server error
