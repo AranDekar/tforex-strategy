@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as request from 'request';
 
-import * as api from '../../../../api';
+import * as api from '../../../strategy';
 
 export class CandleProxy extends api.BaseProxy {
     constructor() {

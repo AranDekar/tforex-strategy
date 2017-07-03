@@ -1,5 +1,5 @@
 import { Document, Schema } from 'mongoose';
-import * as api from '../../../api';
+import * as api from '../../strategy';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
@@ -12,7 +12,7 @@ export interface StrategyEvent {
     payload: any;
 }
 
-export interface StrategyEventDocument extends api.StrategyEvent, Document {
+export interface StrategyEventDocument extends StrategyEvent, Document {
 }
 
 let schema = new Schema({

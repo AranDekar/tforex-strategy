@@ -1,6 +1,6 @@
 import { Document, Schema, Model, Types } from 'mongoose';
 
-import * as api from '../../../api';
+import * as api from '../../strategy';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
@@ -12,7 +12,7 @@ export interface StrategyQuery {
     pips: number;
 }
 
-export interface StrategyQueryDocument extends api.StrategyQuery, Document {
+export interface StrategyQueryDocument extends StrategyQuery, Document {
 }
 
 let schema = new Schema({

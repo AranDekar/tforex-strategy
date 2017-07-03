@@ -1,7 +1,6 @@
 {
     "version": "0.2.0",
-    "configurations": [
-        {
+    "configurations": [{
             "name": "Launch",
             "type": "node",
             "request": "launch",
@@ -17,9 +16,10 @@
             "env": {
                 "NODE_ENV": "development"
             },
-            "externalConsole": false,
+            "smartStep": true,
+            "console": "integratedTerminal",
             "sourceMaps": true,
-            "outDir": null
+            "outFiles": []
         },
         {
             "name": "Attach",
@@ -29,7 +29,7 @@
             "address": "localhost",
             "restart": false,
             "sourceMaps": false,
-            "outDir": null,
+            "outFiles": [],
             "localRoot": "${workspaceRoot}",
             "remoteRoot": null
         },
@@ -37,10 +37,10 @@
             "name": "Attach to Process",
             "type": "node",
             "request": "attach",
-            "processId": "${command.PickProcess}",
+            "processId": "${command:PickProcess}",
             "port": 5858,
             "sourceMaps": false,
-            "outDir": null
+             "outFiles": []
         }
     ]
 }

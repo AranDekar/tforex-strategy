@@ -1,9 +1,3 @@
-export * from './models/strategy.model';
-export * from './models/strategy-event.model';
-export * from './models/strategy-backtest-event.model';
-export * from './models/strategy-query.model';
-export * from './models/strategy-backtest-query.model';
-
 export * from './shared/app-settings';
 export * from './shared/data-access';
 export * from './enums/granularity.enum';
@@ -11,6 +5,9 @@ export * from './enums/instrument.enum';
 
 export * from './interfaces/candle.interface';
 export * from './interfaces/event-response.interface';
+
+import * as Model from './models';
+export { Model }
 
 export * from './proxies/http/shared/authentication.interface';
 export * from './proxies/http/shared/http-basic-auth.service';
