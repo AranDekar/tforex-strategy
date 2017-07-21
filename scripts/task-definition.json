@@ -1,0 +1,40 @@
+{
+    "family": "${ECS_TASK}",
+    "networkMode": "bridge",
+    "containerDefinitions": [
+        {
+            "image": "${AWS_ECS_REPO_DOMAIN}/${IMAGE_NAME}:${IMAGE_VERSION}",
+            "name": "${IMAGE_NAME}",
+            "cpu": 128,
+            "memory": 256,
+            "essential": true,
+            "links": [
+                "tforex-mongo"
+            ],
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "hostPort": 0,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "VIRTUAL_HOST",
+                    "value": "${AWS_VIRTUAL_HOST}"
+                },
+                {
+                    "name": "MONGO_HOST",
+                    "value": "tforex-mongo"
+                }
+            ]
+        },
+        {
+            "name": "tforex-mongo",
+            "image": "mongo",
+            "cpu": 128,
+            "memory": 128,
+            "essential": true
+        }
+    ]
+}

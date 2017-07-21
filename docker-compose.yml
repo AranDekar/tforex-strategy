@@ -1,0 +1,22 @@
+version: "3"
+services:
+    tforex-strategy:
+        build: 
+          context: .
+          dockerfile: Dockerfile
+        image: aran/tforex-strategy
+        ports:
+            - "3000:3000"
+        depends_on:
+            - mongo
+        container_name: tforex-strategy
+    mongo:
+        image: "mongo"
+        container_name: tforex-mongo
+        command: mongod --smallfiles
+        ports:
+            - "27017:27107"
+        networks:
+            - all
+    networks:
+        all:

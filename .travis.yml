@@ -1,0 +1,30 @@
+sudo: required
+language: node_js
+node_js:
+  - node
+services:
+  - docker
+env:
+    - TEST=test
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      node_js: node
+      env: TEST=test
+cache:
+  directories:
+    - "node_modules"
+install:
+  - echo "installing node modules!" # put your normal pre-testing installs here
+  - npm install
+before_script:
+  - npm install -g gulp  
+script: 
+  - gulp
+  - chmod +x ./deploy-envs.sh
+  - chmod +x ./scripts/build.sh
+  - chmod +x ./scripts/deploy.sh
+  - cd scripts && ./build.sh
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then ./deploy.sh; fi
