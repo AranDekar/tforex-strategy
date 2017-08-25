@@ -16,7 +16,10 @@ export class DataAccess {
         this.mongooseInstance.connection.once("open", () => {
             console.log("Conected to mongodb.");
         });
-        this.mongooseInstance.connect(api.Config.settings.mongo_db_connection_string);
+        this.mongooseInstance.connect(api.Config.settings.mongo_db_connection_string, {
+            useMongoClient: true,
+            /* other options */
+        });
         return this.mongooseInstance;
     }
 
