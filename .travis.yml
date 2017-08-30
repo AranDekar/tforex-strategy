@@ -22,7 +22,6 @@ install:
 before_script:
   - npm install -g gulp
 script: 
-  - gulp
   - chmod +x ./deploy-envs.sh
   - chmod +x ./scripts/build.sh
   - chmod +x ./scripts/deploy.sh
