@@ -15,7 +15,7 @@
             ],
             "env": {
                 "NODE_ENV": "development",
-                "MONGO": "mongodb://localhost:27017/tforex"
+                "MONGO": "mongodb://127.0.0.1:27017/tforex"
             },
             "smartStep": true,
             "console": "integratedTerminal",

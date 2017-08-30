@@ -24,7 +24,7 @@
                     "value": "${AWS_VIRTUAL_HOST}"
                 },
                 {
-                    "name": "MONGO_HOST",
+                    "name": "MONGO",
                     "value": "tforex-mongo"
                 }
             ]

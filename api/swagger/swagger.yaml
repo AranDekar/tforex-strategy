@@ -3,7 +3,7 @@ info:
   version: "0.0.1"
   title: Startegy Service
 # during dev, should point to your local machine
-host: localhost:10010
+host: localhost:3000
 # basePath prefixes all resource paths 
 basePath: /
 # 
@@ -108,8 +108,6 @@ paths:
     # binds a127 app logic to a route
     x-swagger-router-controller: hello_world
     get:
-      security:
-        - api_key: []
       description: Returns 'Hello' to the caller
       # used as the method name of the controller
       operationId: hello
