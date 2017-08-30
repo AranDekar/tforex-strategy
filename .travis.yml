@@ -5,14 +5,14 @@ node_js:
 services:
   - docker
 env:
-  - TEST=test
+  - NODE_ENV=production
 matrix:
   include:
     - os: linux
       dist: trusty
       sudo: required
       node_js: node
-      env: TEST=test
+      env: NODE_ENV=production
 cache:
   directories:
     - "node_modules"
