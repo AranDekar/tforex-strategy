@@ -42,7 +42,7 @@
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "start": "swagger project start",
+    "start": "node app.js",
     "test": "swagger project test"
   }
 }
