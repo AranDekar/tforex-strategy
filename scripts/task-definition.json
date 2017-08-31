@@ -7,10 +7,7 @@
             "name": "${IMAGE_NAME}",
             "cpu": 128,
             "memory": 256,
-            "essential": true,
-            // "links": [
-            //     "tforex-mongo"
-            // ],
+            "essential": true,            
             "portMappings": [
                 {
                     "containerPort": 3000,
@@ -22,19 +19,8 @@
                 {
                     "name": "VIRTUAL_HOST",
                     "value": "${AWS_VIRTUAL_HOST}"
-                }
-                // {
-                //     "name": "MONGO",
-                //     "value": "tforex-mongo"
-                // }
+                }                
             ]
-        }
-        // {
-        //     "name": "tforex-mongo",
-        //     "image": "mongo",
-        //     "cpu": 128,
-        //     "memory": 128,
-        //     "essential": true
-        // }
+        }       
     ]
 }
