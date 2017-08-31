@@ -17,8 +17,7 @@ cache:
   directories:
     - "node_modules"
 install:
-  - echo "installing node modules!" # put your normal pre-testing installs here
-  - npm install -g gulp
+  
 before_script: 
 script: 
   - chmod +x ./deploy-envs.sh
