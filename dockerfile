@@ -6,5 +6,4 @@ RUN npm install
 COPY . /app
 EXPOSE 3000
 ENV MONGO="mongodb://localhost:27017/tforex"
-CMD ["gulp"]
 CMD ["npm", "start"]
