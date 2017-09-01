@@ -7,7 +7,7 @@
             "name": "${IMAGE_NAME}",
             "cpu": 128,
             "memory": 256,
-            "essential": true,            
+            "essential": true,
             "portMappings": [
                 {
                     "containerPort": 3000,
@@ -19,8 +19,12 @@
                 {
                     "name": "VIRTUAL_HOST",
                     "value": "${AWS_VIRTUAL_HOST}"
-                }                
+                },
+                {
+                    "name": "MONGO",
+                    "value":"${MONGO}"
+                }
             ]
-        }       
+        }
     ]
 }
