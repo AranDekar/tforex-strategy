@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   version: "0.0.1"
-  title: Startegy Service
+  title: Startegy
 # during dev, should point to your local machine
 host: localhost:3000
 # basePath prefixes all resource paths 
@@ -75,7 +75,7 @@ paths:
             $ref: "#/definitions/Strategy"
   /strategies/backtest:
     x-swagger-router-controller: strategy.controller
-    post:
+    patch:
       tags: 
         - strategy
       security:

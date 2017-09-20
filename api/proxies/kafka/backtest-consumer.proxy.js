@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const kafka = require("kafka-node");
 const rx = require("rxjs");
-const api = require("../../../strategy");
+const api = require("../../../api");
 class BacktestConsumerProxy {
     get onNewCandleReceived$() {
         return this._onNewCandleReceived$.asObservable();
@@ -26,7 +26,7 @@ class BacktestConsumerProxy {
             autoCommit: true,
             groupId: api.Config.settings.candle_history_client_id,
         });
-        // if you don't see any message coming, it may be because you have deleted the topic and the offset 
+        // if you don't see any message coming, it may be because you have deleted the topic and the offset
         // is not reset with this client id.
         this._consumer.on('message', (message) => __awaiter(this, void 0, void 0, function* () {
             if (message && message.value) {
