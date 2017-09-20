@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const request = require("request");
-const api = require("../../../strategy");
+const api = require("../../../api");
 class CandleProxy extends api.BaseProxy {
     constructor() {
         super(api.Config.settings.instrument_base_path);

@@ -1,4 +1,4 @@
-import * as api from '../../../../strategy';
+import * as api from '../../../../api';
 
 export class BaseProxy {
     protected basePath = '';

@@ -1,6 +1,6 @@
 import { Mongoose } from "mongoose";
 
-import * as api from '../../strategy';
+import * as api from '../../api';
 
 export class DataAccess {
     public static mongooseInstance: Mongoose;

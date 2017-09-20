@@ -1,5 +1,5 @@
 import { Document, Schema } from 'mongoose';
-import * as api from '../../strategy';
+import * as api from '../../api';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
@@ -18,7 +18,7 @@ let schema = new Schema({
     strategyId: { type: Schema.Types.ObjectId },
     isDispatched: { type: Boolean, default: false },
     time: { type: String },
-    event: { type: String, enum: ['running', 'done' ] },
+    event: { type: String, enum: ['running', 'done'] },
     payload: { type: Schema.Types.Mixed },
 });
 

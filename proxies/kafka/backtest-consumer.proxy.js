@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const kafka = require("kafka-node");
 const rx = require("rxjs");
-const api = require("../../../strategy");
+const api = require("../../../api");
 class BacktestConsumerProxy {
     get onNewCandleReceived$() {
         return this._onNewCandleReceived$.asObservable();

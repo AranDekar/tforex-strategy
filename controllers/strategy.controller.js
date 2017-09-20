@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const api = require("../../strategy");
+const api = require("../../api");
 function get(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}

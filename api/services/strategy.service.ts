@@ -1,4 +1,4 @@
-import * as api from '../../strategy';
+import * as api from '../../api';
 
 export class StrategyService {
     public async get(id: string | number | null = null): Promise<api.Model.StrategyDocument[]> {

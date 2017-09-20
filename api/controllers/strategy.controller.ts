@@ -1,4 +1,4 @@
-import * as api from '../../strategy';
+import * as api from '../../api';
 
 export async function get(req, res) {
     // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}

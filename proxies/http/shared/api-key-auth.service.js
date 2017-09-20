@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const api = require("../../../../strategy");
+const api = require("../../../../api");
 class ApiKeyAuthService {
     constructor(location, paramName) {
         this.location = location;

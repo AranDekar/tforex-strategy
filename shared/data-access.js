@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const api = require("../../strategy");
+const api = require("../../api");
 class DataAccess {
     static connect() {
         if (DataAccess.mongooseInstance) {

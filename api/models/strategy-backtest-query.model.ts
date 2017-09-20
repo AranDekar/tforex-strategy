@@ -1,6 +1,6 @@
 import { Document, Schema, Model, Types } from 'mongoose';
 
-import * as api from '../../strategy';
+import * as api from '../../api';
 
 let mongoose = api.DataAccess.mongooseInstance;
 
@@ -16,7 +16,7 @@ export interface StrategyBacktestQueryDocument extends StrategyBacktestQuery, Do
 
 let schema = new Schema({
     strategyId: { type: Schema.Types.ObjectId, required: 'strategyId is required' },
-    status: { type: String, enum: ['running', 'done' ], required: 'status is required' },
+    status: { type: String, enum: ['running', 'done'], required: 'status is required' },
     time: { type: String, required: 'time is required' },
     pips: { type: String, required: 'pips is required' },
 });

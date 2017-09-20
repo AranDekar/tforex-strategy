@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const api = require("../../strategy");
+const api = require("../../api");
 let mongoose = api.DataAccess.mongooseInstance;
 let schema = new mongoose_1.Schema({
     name: { type: String, trim: true, required: 'name is required' },
