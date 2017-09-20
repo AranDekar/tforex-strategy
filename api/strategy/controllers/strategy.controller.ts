@@ -2,7 +2,7 @@ import * as api from '../../strategy';
 
 export async function get(req, res) {
     // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-    // let _id = req.swagger.params._id.value;    
+    // let _id = req.swagger.params._id.value;
     try {
         let result: api.Model.Strategy[] = [];
         let service = new api.StrategyService();

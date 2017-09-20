@@ -2,16 +2,10 @@ const gulp = require('gulp');
 
 /* TS/JS */
 const ts = require('gulp-typescript');
-//const babel = require('gulp-babel');
-const tsconfig = require('tsconfig');
-const project = tsconfig.loadSync('tsconfig.json');
 const gulpDebug = require('gulp-debug');
-const gulpFilter = require('gulp-filter');
 const gulpPlumber = require('gulp-plumber');
 const tslint = require('gulp-tslint');
-
 /* Mixed */
-const ext_replace = require('gulp-ext-replace');
 const sourcemaps = require('gulp-sourcemaps');
 const runSequence = require('run-sequence');
 const watch = require('gulp-watch');
@@ -24,14 +18,16 @@ const tsFiles = [
 ];
 
 gulp.task('scripts', function () {
-    let tsProject = ts.createProject('tsconfig.json', { typescript: require('typescript') });
-    let res = gulp.src(project.files, { base: '.', outDir: appPath })
+    let tsProject = ts.createProject('tsconfig.json', {
+        typescript: require('typescript'),
+    });
+    let tsResult = tsProject.src()
         .pipe(sourcemaps.init())
-        .pipe(ts(tsProject))
+        .pipe(tsProject())
         .js
         .pipe(sourcemaps.write('.', {
             includeContent: true,
-            sourceRoot: function (file) { return file.cwd; }
+            sourceRoot: function (file) { return file.base; }
         }))
         .pipe(gulp.dest(''));
 });
@@ -39,8 +35,11 @@ gulp.task('scripts', function () {
 gulp.task('tslint', function () {
     // the following task transiples the ts files in project
     gulp.src(tsFiles)
-        .pipe(tslint({ formatter: "prose" }))
-        .pipe(tslint.report('prose', { summarizeFailureOutput: true, }));
+        .pipe(tslint({
+            formatter: "prose",
+            program: require('tslint').Linter.createProgram("./tsconfig.json"),
+        }))
+        .pipe(tslint.report({ summarizeFailureOutput: true, }));
 });
 
 gulp.task('deploy', function () {
@@ -56,25 +55,29 @@ gulp.task('default', function (done) {
 });
 
 gulp.task('watch-ts', function () {
+    return gulp.watch(tsFiles, function (file) {
+        console.log('compiling ' + file.path + '...');
+        return compileTs(file.path, true);
+    });
+});
+
+function compileTs(files, watchMode) {
     let tsProject = ts.createProject('tsconfig.json', { typescript: require('typescript') });
 
-    return tsProject.src()
-        .pipe(watch(project.files))
-        .pipe(gulpFilter((file) => { file.base = '.'; return file.event === 'change'; }))
+    return gulp.src(files, { base: '.', outDir: '.' })
         .pipe(gulpPlumber())
-        .pipe(gulpDebug({ title: 'changed' }))
-        .pipe(tslint())
-        .pipe(tslint.report('prose', {
-            summarizeFailureOutput: true,
-            emitError: false
+        .pipe(tslint({
+            formatter: "prose",
+            program: require('tslint').Linter.createProgram("./tsconfig.json"),
         }))
+        .pipe(tslint.report({ summarizeFailureOutput: true, }))
         .pipe(sourcemaps.init())
-        .pipe(gulpDebug({ title: 'a' }))
-        .pipe(ts(tsProject))
-        //.js
-        .pipe(gulpDebug({ title: 'b' }))
-        //    .pipe(babel({ presets: ['es2015'] }))
+        .pipe(tsProject())
+        .js
+        .pipe(sourcemaps.write('.', {
+            includeContent: true,
+            sourceRoot: function (file) { return file.base; }
+        }))
         .pipe(gulpDebug({ title: 'compiled' }))
-        .pipe(sourcemaps.write('.', { includeContent: true }))
         .pipe(gulp.dest('.'));
-});
+}

@@ -25,10 +25,10 @@ export class BacktestConsumerProxy {
             ], {
                 autoCommit: true,
                 groupId: api.Config.settings.candle_history_client_id,
-            }
+            },
         );
 
-        // if you don't see any message coming, it may be because you have deleted the topic and the offset 
+        // if you don't see any message coming, it may be because you have deleted the topic and the offset
         // is not reset with this client id.
         this._consumer.on('message', async (message: any) => {
             if (message && message.value) {

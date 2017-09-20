@@ -3,7 +3,7 @@ import * as api from '../../../../strategy';
 export class BaseProxy {
     protected basePath = '';
     protected defaultHeaders: any = {};
-    protected _useQuerystring: boolean = false;
+    protected _useQuerystring = false;
 
     protected authentications = {
         'default': <api.Authentication>new api.VoidAuthService(),

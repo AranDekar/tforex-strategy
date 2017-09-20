@@ -7,7 +7,7 @@ export * from './interfaces/candle.interface';
 export * from './interfaces/event-response.interface';
 
 import * as Model from './models';
-export { Model }
+export { Model };
 
 export * from './proxies/http/shared/authentication.interface';
 export * from './proxies/http/shared/http-basic-auth.service';
