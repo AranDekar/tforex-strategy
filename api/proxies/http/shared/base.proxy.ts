@@ -6,8 +6,8 @@ export class BaseProxy {
     protected _useQuerystring = false;
 
     protected authentications = {
-        'default': <api.Authentication>new api.VoidAuthService(),
-        'api_key': new api.ApiKeyAuthService('header', 'api-key'),
+        'default': <api.proxies.Authentication>new api.proxies.VoidAuthService(),
+        'api_key': new api.proxies.ApiKeyAuthService('header', 'api-key'),
     };
 
     constructor(basePath?: string);
@@ -27,8 +27,8 @@ export class BaseProxy {
         this._useQuerystring = value;
     }
 
-    protected setApiKey(key: api.DefaultApiKeysEnum, value: string) {
-        this.authentications[api.DefaultApiKeysEnum[key]].apiKey = value;
+    protected setApiKey(key: api.proxies.DefaultApiKeysEnum, value: string) {
+        this.authentications[api.proxies.DefaultApiKeysEnum[key]].apiKey = value;
     }
 
     protected extendObj<T1, T2 extends T1>(objA: T1 & T2, objB: T2): T1 & T2 {

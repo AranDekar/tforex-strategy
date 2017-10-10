@@ -2,7 +2,7 @@ import { Document, Schema, Model, Types } from 'mongoose';
 
 import * as api from '../../api';
 
-let mongoose = api.DataAccess.mongooseInstance;
+let mongoose = api.shared.DataAccess.mongooseInstance;
 
 export interface StrategyQuery {
     strategyId: string | number;

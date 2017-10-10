@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const api = require("../../api");
-let mongoose = api.DataAccess.mongooseInstance;
+let mongoose = api.shared.DataAccess.mongooseInstance;
 let schema = new mongoose_1.Schema({
     strategyId: { type: mongoose_1.Schema.Types.ObjectId },
     instrumentId: { type: mongoose_1.Schema.Types.ObjectId },

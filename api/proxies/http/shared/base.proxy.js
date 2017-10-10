@@ -7,8 +7,8 @@ class BaseProxy {
         this.defaultHeaders = {};
         this._useQuerystring = false;
         this.authentications = {
-            'default': new api.VoidAuthService(),
-            'api_key': new api.ApiKeyAuthService('header', 'api-key'),
+            'default': new api.proxies.VoidAuthService(),
+            'api_key': new api.proxies.ApiKeyAuthService('header', 'api-key'),
         };
         if (password) {
             if (basePath) {
@@ -25,7 +25,7 @@ class BaseProxy {
         this._useQuerystring = value;
     }
     setApiKey(key, value) {
-        this.authentications[api.DefaultApiKeysEnum[key]].apiKey = value;
+        this.authentications[api.proxies.DefaultApiKeysEnum[key]].apiKey = value;
     }
     extendObj(objA, objB) {
         for (let key in objB) {

@@ -5,7 +5,7 @@ class ApiKeyAuthService {
     constructor(location, paramName) {
         this.location = location;
         this.paramName = paramName;
-        this.apiKey = api.Config.settings.api_key;
+        this.apiKey = api.shared.Config.settings.api_key;
     }
     applyToRequest(requestOptions) {
         if (this.location === "query") {

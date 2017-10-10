@@ -2,11 +2,11 @@ import * as request from 'request';
 
 import * as api from '../../../../api';
 
-export class ApiKeyAuthService implements api.Authentication {
+export class ApiKeyAuthService implements api.proxies.Authentication {
     public apiKey: string;
 
     constructor(private location: string, private paramName: string) {
-        this.apiKey = api.Config.settings.api_key;
+        this.apiKey = api.shared.Config.settings.api_key;
     }
 
     public applyToRequest(requestOptions: request.Options): void {

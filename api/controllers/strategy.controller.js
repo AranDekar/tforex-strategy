@@ -15,7 +15,7 @@ function get(req, res) {
         // let _id = req.swagger.params._id.value;
         try {
             let result = [];
-            let service = new api.StrategyService();
+            let service = new api.services.StrategyService();
             let data = yield service.get();
             res.json(result);
         }
@@ -28,7 +28,7 @@ exports.get = get;
 function post(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-        let service = new api.StrategyService();
+        let service = new api.services.StrategyService();
         let model = yield service.create(req.body);
         res.json(model);
     });
@@ -41,7 +41,7 @@ function backtest(req, res, next) {
             throw new Error('input arguments are not passed correctly!');
         }
         try {
-            let srv = new api.StrategyService();
+            let srv = new api.services.StrategyService();
             yield srv.backtest(body.strategy, body.instrument);
             res.status(200).send({ message: 'backtesting strategy' });
         }
