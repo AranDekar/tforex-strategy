@@ -1,7 +1,7 @@
 let swaggerExpress = require('swagger-express-mw');
 let app = require('express')();
 let cors = require('cors');
-let api = require('./api');
+let shared = require('./api/shared');
 module.exports = app; // for testing
 let corsOptions = {
     credentials: true,
@@ -14,7 +14,7 @@ let config = {
             console.log('in apiKeySecurity (req: ' + JSON.stringify(req.headers) + ', def: ' +
                 JSON.stringify(authOrSecDef) + ', scopes: ' + scopesOrApiKey + ')');
             // your security code
-            if (api.Config.settings.api_key === scopesOrApiKey) {
+            if (shared.Config.settings.api_key === scopesOrApiKey) {
                 cb();
             }
             else {

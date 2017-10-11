@@ -1,6 +1,6 @@
 import { Mongoose } from "mongoose";
 
-import * as api from '../../api';
+import * as shared from '../shared';
 
 export class DataAccess {
     public static mongooseInstance: Mongoose;
@@ -16,11 +16,8 @@ export class DataAccess {
         this.mongooseInstance.connection.once("open", () => {
             console.log("Conected to mongodb.");
         });
-        console.log(`trying to connect to ${api.shared.Config.settings.mongo_db_connection_string}`);
-
-        this.mongooseInstance.connect(api.shared.Config.settings.mongo_db_connection_string, {
+        this.mongooseInstance.connect(shared.Config.settings.mongo_db_connection_string, {
             useMongoClient: true,
-            /* other options */
         });
         return this.mongooseInstance;
     }

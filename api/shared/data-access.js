@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const api = require("../../api");
+const shared = require("../shared");
 class DataAccess {
     static connect() {
         if (DataAccess.mongooseInstance) {
@@ -13,8 +13,7 @@ class DataAccess {
         this.mongooseInstance.connection.once("open", () => {
             console.log("Conected to mongodb.");
         });
-        console.log(`trying to connect to ${api.shared.Config.settings.mongo_db_connection_string}`);
-        this.mongooseInstance.connect(api.shared.Config.settings.mongo_db_connection_string, {
+        this.mongooseInstance.connect(shared.Config.settings.mongo_db_connection_string, {
             useMongoClient: true,
         });
         return this.mongooseInstance;

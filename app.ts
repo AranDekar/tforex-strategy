@@ -1,7 +1,7 @@
 let swaggerExpress = require('swagger-express-mw');
 let app = require('express')();
 let cors = require('cors');
-let api = require('./api');
+let shared = require('./api/shared');
 
 module.exports = app; // for testing
 
@@ -18,7 +18,7 @@ let config = {
         JSON.stringify(authOrSecDef) + ', scopes: ' + scopesOrApiKey + ')');
 
       // your security code
-      if (api.Config.settings.api_key === scopesOrApiKey) {
+      if (shared.Config.settings.api_key === scopesOrApiKey) {
         cb();
       } else {
         cb(new Error('access denied!'));
