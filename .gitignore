@@ -83,4 +83,4 @@ $RECYCLE.BIN/
 *.js.map
 
 api/helpers/app-settings.ts
-.vscode/temp.sql
+.vscode
