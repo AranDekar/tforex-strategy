@@ -6,5 +6,4 @@ class VoidAuthService {
     }
 }
 exports.VoidAuthService = VoidAuthService;
-
 //# sourceMappingURL=void-auth.service.js.map

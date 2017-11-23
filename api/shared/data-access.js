@@ -24,5 +24,4 @@ class DataAccess {
 }
 exports.DataAccess = DataAccess;
 DataAccess.connect();
-
 //# sourceMappingURL=data-access.js.map

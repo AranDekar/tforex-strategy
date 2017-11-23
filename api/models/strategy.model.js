@@ -12,5 +12,4 @@ let schema = new mongoose_1.Schema({
     postedBy: { type: mongoose_1.Schema.Types.ObjectId, required: 'postedBy is required' },
 });
 exports.strategyModel = mongoose.model('strategy', schema);
-
 //# sourceMappingURL=strategy.model.js.map

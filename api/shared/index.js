@@ -5,5 +5,4 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./app-settings"));
 __export(require("./data-access"));
-
 //# sourceMappingURL=index.js.map

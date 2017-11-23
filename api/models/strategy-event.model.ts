@@ -1,27 +1,57 @@
-import { Document, Schema } from 'mongoose';
+import { Document, Schema, Model } from 'mongoose';
 import * as api from '../../api';
 
 let mongoose = api.shared.DataAccess.mongooseInstance;
 
-export interface StrategyEvent {
-    strategyId: string | number;
-    instrumentId: string | number;
+export interface StrategyEventDocument extends Document {
+    topic: string;
     isDispatched: boolean;
-    time: string;
+    time: number;
     event: string;
     payload: any;
 }
-
-export interface StrategyEventDocument extends StrategyEvent, Document {
+export interface StrategyEventDocumentOperations extends Model<StrategyEventDocument> {
+    findUndispatchedBacktestEvents(topic: string): Promise<StrategyEventDocument[]>;
+    findUndispatchedLiveEvents(topic: string): Promise<StrategyEventDocument[]>;
+    findBacktestEventsToReplay(topic: string, time: number): Promise<StrategyEventDocument[]>;
+    findLiveEventsToReplay(topic: string, time: number): Promise<StrategyEventDocument[]>;
 }
 
 let schema = new Schema({
-    strategyId: { type: Schema.Types.ObjectId },
-    instrumentId: { type: Schema.Types.ObjectId },
+    topic: { type: String, index: true },
     isDispatched: { type: Boolean, default: false },
-    time: { type: String },
-    event: { type: String, enum: ['in', 'out', 'pending'] },
+    time: { type: Number },
+    event: { type: String },
     payload: { type: Schema.Types.Mixed },
 });
 
-export let strategyEventModel = mongoose.model<StrategyEventDocument>('strategy_event', schema);
+schema.statics.findUndispatchedBacktestEvents = async (topic: string) => {
+    return strategyBacktestEventModel
+        .find({ isDispatched: false, topic: topic })
+        .sort({ 'time': 1 })
+        .exec();
+};
+schema.statics.findUndispatchedLiveEvents = async (topic: string) => {
+    return strategyLiveEventModel
+        .find({ isDispatched: false, topic: topic })
+        .sort({ 'time': 1 })
+        .exec();
+};
+
+schema.statics.findBacktestEventsToReplay = async (topic: string, time: number) => {
+    return strategyBacktestEventModel
+        .find({ time: { $gt: time }, topic: topic })
+        .sort({ 'time': 1 })
+        .exec();
+};
+
+schema.statics.findLiveEventsToReplay = async (topic: string, time: number) => {
+    return strategyLiveEventModel
+        .find({ time: { $gt: time }, topic: topic })
+        .sort({ 'time': 1 })
+        .exec();
+};
+
+export let strategyLiveEventModel = <StrategyEventDocumentOperations>mongoose.model<StrategyEventDocument>('strategy_live_event', schema);
+export let strategyBacktestEventModel = <StrategyEventDocumentOperations>mongoose.model<StrategyEventDocument>('strategy_backtest_event',
+    schema);

@@ -8,5 +8,4 @@ class OAuthService {
     }
 }
 exports.OAuthService = OAuthService;
-
 //# sourceMappingURL=o-auth.service.js.map

@@ -4,5 +4,6 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./strategy.service"));
-
+__export(require("./strategy-backtest.service"));
+__export(require("./strategy-pool/raising-candles"));
 //# sourceMappingURL=index.js.map

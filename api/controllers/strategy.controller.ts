@@ -6,8 +6,8 @@ export async function get(req, res) {
     try {
         let result: api.models.Strategy[] = [];
         let service = new api.services.StrategyService();
-        let data = await service.get();
-        res.json(result);
+        let data = await service.getAll();
+        res.json(data);
     } catch (err) {
         throw new Error(err);
     }
@@ -21,14 +21,20 @@ export async function post(req, res) {
 }
 
 export async function backtest(req, res, next) {
-    let body = req.body;
-    if (!body || !body.strategy || !body.instrument) {
-        throw new Error('input arguments are not passed correctly!');
-    }
+
+    let instrument = req.swagger.params.instrument.value;
+    let strategy = req.swagger.params.strategy.value;
+
     try {
-        let srv = new api.services.StrategyService();
-        await srv.backtest(body.strategy, body.instrument);
-        res.status(200).send({ message: 'backtesting strategy' });
+        let strategyService = new api.services.StrategyService();
+        let backtestService = new api.services.StrategyBacktestService();
+        let strategyDocument = await strategyService.getById(strategy);
+        if (strategyDocument) {
+            await backtestService.backtest(strategyDocument, instrument);
+            res.status(200).send({ message: 'backtesting strategy' });
+        } else {
+            throw new Error('strategy not found!');
+        }
     } catch (err) {
         res.statusCode = 500; // internal server error
         next(err);

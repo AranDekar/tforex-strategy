@@ -17,5 +17,4 @@ class ApiKeyAuthService {
     }
 }
 exports.ApiKeyAuthService = ApiKeyAuthService;
-
 //# sourceMappingURL=api-key-auth.service.js.map

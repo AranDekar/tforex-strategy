@@ -9,5 +9,4 @@ var GranularityEnum;
     GranularityEnum[GranularityEnum["H4"] = 'H4'] = "H4";
     GranularityEnum[GranularityEnum["D1"] = 'D1'] = "D1";
 })(GranularityEnum = exports.GranularityEnum || (exports.GranularityEnum = {}));
-
 //# sourceMappingURL=granularity.enum.js.map

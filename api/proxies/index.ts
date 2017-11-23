@@ -6,4 +6,7 @@ export * from './http/shared/o-auth.service';
 export * from './http/shared/void-auth.service';
 export * from './http/shared/base.proxy';
 export * from './http/shared/default-api-key.enum';
-export * from './kafka/instrument-granularity-topic-consumer.proxy';
+export * from './http/instrument.proxy';
+export * from './kafka/candle-consumer.proxy';
+export * from './kafka/strategy-backtest-producer.proxy';
+export * from './kafka/strategy-backtest-consumer.proxy';

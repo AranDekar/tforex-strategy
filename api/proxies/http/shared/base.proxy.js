@@ -37,5 +37,4 @@ class BaseProxy {
     }
 }
 exports.BaseProxy = BaseProxy;
-
 //# sourceMappingURL=base.proxy.js.map

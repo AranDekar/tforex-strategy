@@ -8,16 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+let asyncLock = require('async-lock');
 const api = require("../../api");
 class StrategyService {
-    get(id = null) {
+    getAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (id) {
-                return yield api.models.strategyModel.find({ id: id }).exec();
-            }
-            else {
-                return yield api.models.strategyModel.find().exec();
-            }
+            return yield api.models.strategyModel.find().exec();
+        });
+    }
+    getById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield api.models.strategyModel.findById(id).exec();
         });
     }
     create(strategy) {
@@ -27,36 +28,6 @@ class StrategyService {
             return model;
         });
     }
-    backtest(strategyId, instrument) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let svc = new api.services.StrategyService();
-            let strategies = yield svc.get(strategyId);
-            if (!strategies || strategies.length !== 1) {
-                throw new Error('strategy cannot be found!');
-            }
-            let strategy = strategies[0];
-            let topic = this.findTopicName(instrument, api.enums.GranularityEnum[strategy.granularity]);
-            let groupId = `${strategy.name}-${topic}`;
-            let kafkaConsumer = new api.proxies.InstrumentGranularityTopicConsumerProxy(topic, groupId);
-            kafkaConsumer.subscribe().map(x => x).subscribe(candle => { return; }, error => { return; });
-        });
-    }
-    process(candle) {
-        return null;
-    }
-    findTopicName(instrument, granularity) {
-        const audUsdM5Topic = 'audUsdM5';
-        switch (instrument) {
-            case api.enums.InstrumentEnum.AUD_USD:
-                switch (granularity) {
-                    case api.enums.GranularityEnum.M5:
-                        return audUsdM5Topic;
-                }
-                break;
-        }
-        throw new Error('cannot find the topic name!');
-    }
 }
 exports.StrategyService = StrategyService;
-
 //# sourceMappingURL=strategy.service.js.map

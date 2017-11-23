@@ -9,5 +9,4 @@ class HttpBasicAuthService {
     }
 }
 exports.HttpBasicAuthService = HttpBasicAuthService;
-
 //# sourceMappingURL=http-basic-auth.service.js.map

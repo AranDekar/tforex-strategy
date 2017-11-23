@@ -5,8 +5,7 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./strategy.model"));
 __export(require("./strategy-event.model"));
-__export(require("./strategy-backtest-event.model"));
-__export(require("./strategy-query.model"));
-__export(require("./strategy-backtest-query.model"));
-
+__export(require("./strategy-backtest-report.model"));
+__export(require("./strategy-live-report.model"));
+__export(require("./strategy-snapshot.model"));
 //# sourceMappingURL=index.js.map
