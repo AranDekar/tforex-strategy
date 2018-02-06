@@ -49,7 +49,7 @@ class RaisingCandles {
                     lastRaisingCandle: this._lastRaisingCandle,
                     raisingCount: this._raisingCount,
                     inTradeStatus: this._inTradeStatus,
-                    idleCount: this._idleCount,
+                    idleCount: this._idleCount
                 },
                 time: this._time,
             };
@@ -63,13 +63,13 @@ class RaisingCandles {
             let payload, event;
             let calcVariance = (value) => { return Number(value.toFixed(5)); };
             if (!this._lastRaisingCandle) {
-                let variance = calcVariance(candle.closeBid - candle.openBid);
+                const variance = calcVariance(candle.closeBid - candle.openBid);
                 if (variance === 0) {
                     result = { event: `idle`, payload: null };
                 }
                 else if (variance > 0) {
                     this._lastRaisingCandle = {
-                        variance: variance,
+                        variance,
                         open: candle.openBid,
                         close: candle.closeBid,
                     };
@@ -77,7 +77,7 @@ class RaisingCandles {
                 }
                 else {
                     this._lastRaisingCandle = {
-                        variance: variance,
+                        variance,
                         open: candle.openBid,
                         close: candle.closeBid,
                     };
@@ -92,7 +92,7 @@ class RaisingCandles {
                     }
                     else if (variance > 0) {
                         this._lastRaisingCandle = {
-                            variance: variance,
+                            variance,
                             open: this._lastRaisingCandle.close,
                             close: candle.closeBid,
                         };
@@ -113,11 +113,11 @@ class RaisingCandles {
                         else {
                             // this is changing the trend (up to down)
                             this._lastRaisingCandle = {
-                                variance: variance,
+                                variance,
                                 open: this._lastRaisingCandle.open,
                                 close: candle.closeBid,
                             };
-                            if (this._inTradeStatus !== "out") {
+                            if (this._inTradeStatus !== 'out') {
                                 result = { event: `out`, payload: this._lastRaisingCandle };
                             }
                             else {
@@ -133,7 +133,7 @@ class RaisingCandles {
                     }
                     else if (variance < 0) {
                         this._lastRaisingCandle = {
-                            variance: variance,
+                            variance,
                             open: this._lastRaisingCandle.close,
                             close: candle.closeBid,
                         };
@@ -154,11 +154,11 @@ class RaisingCandles {
                         else {
                             // this is changing the trend (up to down)
                             this._lastRaisingCandle = {
-                                variance: variance,
+                                variance,
                                 open: this._lastRaisingCandle.open,
                                 close: candle.closeBid,
                             };
-                            if (this._inTradeStatus !== "out") {
+                            if (this._inTradeStatus !== 'out') {
                                 result = { event: `out`, payload: this._lastRaisingCandle };
                             }
                             else {

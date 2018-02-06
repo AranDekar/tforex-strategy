@@ -25,25 +25,17 @@
             "outFiles": []
         },
         {
-            "name": "Attach",
             "type": "node",
             "request": "attach",
-            "port": 5858,
-            "address": "localhost",
-            "restart": false,
-            "sourceMaps": false,
-            "outFiles": [],
-            "localRoot": "${workspaceRoot}",
-            "remoteRoot": null
-        },
-        {
-            "name": "Attach to Process",
-            "type": "node",
-            "request": "attach",
-            "processId": "${command:PickProcess}",
-            "port": 5858,
-            "sourceMaps": false,
-            "outFiles": []
+            "name": "Node: Nodemon",
+            // "processId": "${command:PickProcess}",
+            "restart": true,
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/usr/src/app/",
+            "port": 5757,
+            "address": "localhost"
         }
     ]
 }

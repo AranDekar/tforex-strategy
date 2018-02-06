@@ -22,7 +22,11 @@
                 },
                 {
                     "name": "MONGO",
-                    "value":"${MONGO}"
+                    "value": "${MONGO}"
+                },
+                {
+                    "name": "KAFKA",
+                    "value": "${KAFKA}"
                 }
             ]
         }

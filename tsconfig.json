@@ -6,6 +6,12 @@
         "moduleResolution": "node",
         "rootDir": ".",
         "sourceMap": true,
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "*",
+            ],
+        },
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "removeComments": false,

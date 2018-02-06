@@ -95,6 +95,17 @@ paths:
           type: string
           in: query
           required: true
+        - name: payload
+          description: the payload which contains a description for the backtest
+          in: body
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+                description: a description for the backtest
+                example: testing with RSA added to the strategy
+              
       responses:
         "200":
           description: Success

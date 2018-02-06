@@ -10,22 +10,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const api = require("../../api");
-let mongoose = api.shared.DataAccess.mongooseInstance;
-let schema = new mongoose_1.Schema({
+const mongoose = api.shared.DataAccess.mongooseInstance;
+const schema = new mongoose_1.Schema({
     topic: { type: String },
     time: { type: Number },
     payload: { type: mongoose_1.Schema.Types.Mixed },
 });
 schema.statics.findLastBacktestSnapshot = (topic) => __awaiter(this, void 0, void 0, function* () {
     return exports.strategyBacktestSnapshotModel
-        .findOne({ topic: topic })
-        .sort({ 'time': -1 })
+        .findOne({ topic })
+        .sort({ time: -1 })
         .exec();
 });
 schema.statics.findLastLiveSnapshot = (topic) => __awaiter(this, void 0, void 0, function* () {
     return exports.strategyLiveSnapshotModel
-        .findOne({ topic: topic })
-        .sort({ 'time': -1 })
+        .findOne({ topic })
+        .sort({ time: -1 })
         .exec();
 });
 exports.strategyLiveSnapshotModel = mongoose.model('strategy_live_snapshot', schema);

@@ -1,112 +1,43 @@
 {
+  "extends": "tslint:recommended",
   "rules": {
-    "class-name": true,
-    "comment-format": [
-      true,
-      "check-space"
-    ], ///////  whitespace after comment //comment => // comment
-    "curly": true,
-    "eofline": false,
-    "forin": true, /////  loops through the properties of an object. and enforces an if statement
-    // let o = { key1: 'value1', key2: 'value2' };
-    //       for (let v in o) {
-    //           if (v) {
-    //               console.log(v);
-    //               console.log(o[v]);
-    //           }
-    //       }
-    "indent": [
-      true,
-      "spaces"
-    ],
-    "label-position": true, /////  label: only on sensible statements (for-)
-    "max-line-length": [
-      true,
-      140
-    ], /////???????   145 max length until scroll bar appear in laptop
-    "member-access": true,
-    "member-ordering": [
-      true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
-    ],
-    "no-arg": true, ///// arguments are the arguments passed to a function this is a local variable in all functions
-    "no-bitwise": false,
-    "no-console": [
-      false,
-      "debug",
-      "info",
-      "time",
-      "timeEnd",
-      "trace"
-    ],
-    "no-construct": true,
-    "no-debugger": false,
-    "no-duplicate-variable": true,
-    "no-empty": true,
-    "no-eval": false,
-    "no-inferrable-types": true,
-    "no-shadowed-variable": true, //////   https://en.wikipedia.org/wiki/Variable_shadowing    closure  http://www.w3schools.com/js/js_function_closures.asp
-    "no-string-literal": false,
-    "no-switch-case-fall-through": true,
-    "no-trailing-whitespace": true,
-    "no-unused-expression": true,
-    "no-unused-variable": false,
-    "no-use-before-declare": true,
-    "no-var-keyword": true,
-    "object-literal-sort-keys": false, //// Requires keys in object literals to be sorted alphabetically
-    "one-line": [
-      true,
-      "check-open-brace",
-      "check-catch",
-      "check-else",
-      "check-finally",
-      "check-whitespace"
-    ],
     "quotemark": [
-      false,
-      "double",
+      true,
+      "single",
       "avoid-escape"
     ],
-    "radix": true, /////   parseInt(number, radix)    (the base in mathematical numeral systems) between 2 and 36     => https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/parseInt 
-    "semicolon": [
-      true
-    ],
-    "trailing-comma": [
+    "object-literal-sort-keys": false,
+    "ordered-imports": [
       true,
       {
-        "singleline": "never",
-        "multiline": "always"
+        "import-sources-order": "any",
+        "named-imports-order": "any"
       }
     ],
-    "triple-equals": [
-      true,
-      "allow-null-check"
+    "no-console": [
+      false
     ],
-    "typedef-whitespace": [
+    "interface-name": [
       true,
-      {
-        "call-signature": "nospace",
-        "index-signature": "nospace",
-        "parameter": "nospace",
-        "property-declaration": "nospace",
-        "variable-declaration": "nospace"
-      }
+      "never-prefix"
     ],
-    "variable-name": [
-      true,
-      "ban-keywords",
-      "check-format",
-      "allow-leading-underscore"
-    ], /////     cannot force underscore as it is not recommended but can set the check to true and allow underscore at the beginning
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-separator",
-      "check-type"
+    "eofline": false,
+    "linebreak-style": [
+      false
+    ],
+    "max-classes-per-file": [
+      false
+    ],
+    "member-ordering": [
+      false
+    ],
+    "no-var-requires": false,
+    "one-line": [
+      false
+    ],
+    "array-type": [
+      false
     ]
-  }
+  },
+  "rulesDirectory": []
 }

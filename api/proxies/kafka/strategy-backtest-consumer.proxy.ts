@@ -5,19 +5,19 @@ import * as api from '../../../api';
 
 export class StrategyBacktestConsumerProxy {
 
-    constructor(private _topicName: string) {
+    constructor(private topicName: string) {
     }
 
     public createTopic() {
         return new Promise(async (resolve, reject) => {
-            let client = new kafka.KafkaClient({
+            const client = new kafka.KafkaClient({
                 kafkaHost: api.shared.Config.settings.kafka_conn_string,
             });
 
-            let producer = new kafka.Producer(client);
+            const producer = new kafka.Producer(client);
             // Create topics sync
             producer.on('ready', () => {
-                producer.createTopics([this._topicName], false, function (err, data) {
+                producer.createTopics([this.topicName], false, (err, data) => {
                     if (err) { return reject(err); }
                     console.log(data);
                     resolve(true);
@@ -45,7 +45,6 @@ export class StrategyBacktestConsumerProxy {
     //             console.log(offsets[this._topicName][partition]);
     //             lastOffset = offsets[this._topicName][partition];
 
-
     //             let consumer = new kafka.Consumer(
     //                 client, [
     //                     { topic: this._topicName, offset: offset },
@@ -72,15 +71,16 @@ export class StrategyBacktestConsumerProxy {
     //     });
     // }
 
-    public subscribe() {
-        return new rx.Observable<api.models.StrategyEventDocument>(x => {
-            let client = new kafka.KafkaClient({
+    public subscribe(count) {
+        return new rx.Observable<api.models.StrategyEventDocument[]>((x) => {
+            let items: any[] = [];
+            const client = new kafka.KafkaClient({
                 kafkaHost: api.shared.Config.settings.kafka_conn_string,
             });
 
-            let consumer = new kafka.Consumer(
+            const consumer = new kafka.Consumer(
                 client, [
-                    { topic: this._topicName, offset: 0 },
+                    { topic: this.topicName, offset: 0 },
                 ], {
                     autoCommit: true,
                     fromOffset: true,
@@ -89,8 +89,13 @@ export class StrategyBacktestConsumerProxy {
 
             consumer.on('message', async (message: any) => {
                 if (message && message.value) {
-                    let item = JSON.parse(message.value);
-                    x.next(item);
+                    const item = JSON.parse(message.value);
+                    items.push(item);
+                }
+                if (items.length >= count) {
+                    console.log('NEXT is gonna called');
+                    x.next(items);
+                    items = [];
                 }
             });
             consumer.on('error', (err: string) => {

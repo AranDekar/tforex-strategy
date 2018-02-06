@@ -1,53 +1,55 @@
 import * as mongoose from 'mongoose';
 import * as kafka from 'kafka-node';
 
-import * as api from '../../../api';
+import * as api from 'api';
+import { disconnect } from 'cluster';
 
 export class StrategyBacktestProducerProxy {
-    private _producer: kafka.Producer;
+    private producer: kafka.Producer;
 
-    constructor(private _topic: string) {
+    constructor(private topic: string) {
     }
 
-    public async publish() {
-        return new Promise(async (resolve, reject) => {
-            let dispatched = await api.models.strategyBacktestEventModel.findUndispatchedBacktestEvents(this._topic);
+    public async publish(events: api.models.StrategyEvent[] | null) {
+        let dispatched;
+        if (events) {
+            dispatched = events;
+        } else {
+            dispatched = await api.models.strategyBacktestEventModel.findUndispatchedBacktestEvents(
+                this.topic);
+        }
+        if (dispatched.length === 0) {
+            console.log('no backtest event to publish!');
+            // resolve(0);
+        }
 
-            if (dispatched.length === 0) {
-                console.log('no backtest event to publish!');
-                // resolve(0);
-            }
+        const client = new kafka.KafkaClient({
+            kafkaHost: api.shared.Config.settings.kafka_conn_string,
+        });
 
-            let client = new kafka.KafkaClient({
-                kafkaHost: api.shared.Config.settings.kafka_conn_string,
-            });
+        this.producer = new kafka.Producer(client);
+        this.producer.on('ready', () => {
+            let payload: any;
+            console.log('NUMBER OF DISPATCHED', dispatched.length);
+            for (const item of dispatched) {
+                payload = { topic: this.topic, messages: JSON.stringify(item) };
 
-            this._producer = new kafka.Producer(client);
-
-            this._producer.on('ready', () => {
-                let payloads: any[] = [];
-                for (let item of dispatched) {
-                    payloads.push({ topic: this._topic, messages: JSON.stringify(item) });
-                }
-                this._producer.send(payloads, async (err, data) => {
+                this.producer.send([payload], async (err, data) => {
                     if (err) {
                         console.log(err);
-                        // reject(err);
                     } else {
-                        for (let item of dispatched) {
-                            item.isDispatched = true;
-                            // await item.save();
+                        item.isDispatched = true;
+                        if (!events) {
                             item.save();
                         }
-                        resolve(dispatched.length);
                     }
                 });
-            });
+            }
+            console.log('ALL DISPATCHED');
+        });
 
-            this._producer.on('error', (err) => {
-                console.log(err);
-                reject(err);
-            });
+        this.producer.on('error', (err) => {
+            console.log(err);
         });
     }
 }

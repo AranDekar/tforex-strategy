@@ -1,3 +1,4 @@
+require('module-alias/register');
 let swaggerExpressMw = require('swagger-express-mw');
 let app = require('express')();
 let cors = require('cors');

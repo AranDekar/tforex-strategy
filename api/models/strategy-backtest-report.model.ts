@@ -2,24 +2,24 @@ import { Document, Schema, Model, Types } from 'mongoose';
 
 import * as api from '../../api';
 
-let mongoose = api.shared.DataAccess.mongooseInstance;
+const mongoose = api.shared.DataAccess.mongooseInstance;
 
 export interface StrategyBcktestReport {
-    strategyId: string | number;
-    instrument: string;
+    strategyId: string | undefined;
+    instrument: api.enums.InstrumentEnum;
     topic: string;
     timeIn: number;
-    timeOut: number;
+    timeOut?: number;
     candleIn: number;
-    candleOut: number;
+    candleOut?: number;
     tradeType: string;
-    pips: number;
+    pips?: number;
 }
 
 export interface StrategyBacktestReportDocument extends StrategyBcktestReport, Document {
 }
 
-let schema = new Schema({
+const schema = new Schema({
     strategyId: { type: Schema.Types.ObjectId, required: 'strategyId is required' },
     instrument: { type: String, required: 'instrumentId is required' },
     topic: { type: String, required: 'Topic is required' },
@@ -31,4 +31,5 @@ let schema = new Schema({
     pips: { type: Number },
 });
 
-export let strategyBacktestReportModel = mongoose.model<StrategyBacktestReportDocument>('strategy_backtest_report', schema);
+export let strategyBacktestReportModel = mongoose.model<StrategyBacktestReportDocument>(
+    'strategy_backtest_report', schema);

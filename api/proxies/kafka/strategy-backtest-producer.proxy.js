@@ -9,48 +9,50 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const kafka = require("kafka-node");
-const api = require("../../../api");
+const api = require("api");
 class StrategyBacktestProducerProxy {
-    constructor(_topic) {
-        this._topic = _topic;
+    constructor(topic) {
+        this.topic = topic;
     }
-    publish() {
+    publish(events) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-                let dispatched = yield api.models.strategyBacktestEventModel.findUndispatchedBacktestEvents(this._topic);
-                if (dispatched.length === 0) {
-                    console.log('no backtest event to publish!');
-                    // resolve(0);
-                }
-                let client = new kafka.KafkaClient({
-                    kafkaHost: api.shared.Config.settings.kafka_conn_string,
-                });
-                this._producer = new kafka.Producer(client);
-                this._producer.on('ready', () => {
-                    let payloads = [];
-                    for (let item of dispatched) {
-                        payloads.push({ topic: this._topic, messages: JSON.stringify(item) });
-                    }
-                    this._producer.send(payloads, (err, data) => __awaiter(this, void 0, void 0, function* () {
+            let dispatched;
+            if (events) {
+                dispatched = events;
+            }
+            else {
+                dispatched = yield api.models.strategyBacktestEventModel.findUndispatchedBacktestEvents(this.topic);
+            }
+            if (dispatched.length === 0) {
+                console.log('no backtest event to publish!');
+                // resolve(0);
+            }
+            const client = new kafka.KafkaClient({
+                kafkaHost: api.shared.Config.settings.kafka_conn_string,
+            });
+            this.producer = new kafka.Producer(client);
+            this.producer.on('ready', () => {
+                let payload;
+                console.log('NUMBER OF DISPATCHED', dispatched.length);
+                for (const item of dispatched) {
+                    payload = { topic: this.topic, messages: JSON.stringify(item) };
+                    this.producer.send([payload], (err, data) => __awaiter(this, void 0, void 0, function* () {
                         if (err) {
                             console.log(err);
-                            // reject(err);
                         }
                         else {
-                            for (let item of dispatched) {
-                                item.isDispatched = true;
-                                // await item.save();
+                            item.isDispatched = true;
+                            if (!events) {
                                 item.save();
                             }
-                            resolve(dispatched.length);
                         }
                     }));
-                });
-                this._producer.on('error', (err) => {
-                    console.log(err);
-                    reject(err);
-                });
-            }));
+                }
+                console.log('ALL DISPATCHED');
+            });
+            this.producer.on('error', (err) => {
+                console.log(err);
+            });
         });
     }
 }

@@ -13,7 +13,7 @@ export class RaisingCandles {
     private _inTradeStatus = 'out';
     private _time;
 
-    public replay(snapshot: api.models.StrategySnapshotDocument, events: api.models.StrategyEventDocument[]) {
+    public replay(snapshot: api.models.StrategySnapshot | null, events: api.models.StrategyEvent[]) {
         if (snapshot) {
             this._lastRaisingCandle = snapshot.payload.lastRaisingCandle;
             this._raisingCount = snapshot.payload.raisingCount;
@@ -53,7 +53,7 @@ export class RaisingCandles {
                     lastRaisingCandle: this._lastRaisingCandle,
                     raisingCount: this._raisingCount,
                     inTradeStatus: this._inTradeStatus,
-                    idleCount: this._idleCount,
+                    idleCount: this._idleCount
                 },
                 time: this._time,
             };
@@ -68,20 +68,20 @@ export class RaisingCandles {
             let calcVariance = (value: number) => { return Number(value.toFixed(5)); };
 
             if (!this._lastRaisingCandle) {
-                let variance = calcVariance(candle.closeBid - candle.openBid);
+                const variance = calcVariance(candle.closeBid - candle.openBid);
 
                 if (variance === 0) {
                     result = { event: `idle`, payload: null };
                 } else if (variance > 0) {
                     this._lastRaisingCandle = {
-                        variance: variance,
+                        variance,
                         open: candle.openBid,
                         close: candle.closeBid,
                     };
                     result = { event: `up`, payload: this._lastRaisingCandle };
                 } else {
                     this._lastRaisingCandle = {
-                        variance: variance,
+                        variance,
                         open: candle.openBid,
                         close: candle.closeBid,
                     };
@@ -94,7 +94,7 @@ export class RaisingCandles {
                         result = { event: `idle`, payload: this._lastRaisingCandle };
                     } else if (variance > 0) {
                         this._lastRaisingCandle = {
-                            variance: variance,
+                            variance,
                             open: this._lastRaisingCandle.close,
                             close: candle.closeBid,
                         };
@@ -112,11 +112,11 @@ export class RaisingCandles {
                         } else {
                             // this is changing the trend (up to down)
                             this._lastRaisingCandle = {
-                                variance: variance,
+                                variance,
                                 open: this._lastRaisingCandle.open,
                                 close: candle.closeBid,
                             };
-                            if (this._inTradeStatus !== "out") {
+                            if (this._inTradeStatus !== 'out') {
                                 result = { event: `out`, payload: this._lastRaisingCandle };
                             } else {
                                 result = { event: `change`, payload: this._lastRaisingCandle };
@@ -129,7 +129,7 @@ export class RaisingCandles {
                         result = { event: `idle`, payload: this._lastRaisingCandle };
                     } else if (variance < 0) {
                         this._lastRaisingCandle = {
-                            variance: variance,
+                            variance,
                             open: this._lastRaisingCandle.close,
                             close: candle.closeBid,
                         };
@@ -148,12 +148,12 @@ export class RaisingCandles {
                         } else {
                             // this is changing the trend (up to down)
                             this._lastRaisingCandle = {
-                                variance: variance,
+                                variance,
                                 open: this._lastRaisingCandle.open,
                                 close: candle.closeBid,
                             };
 
-                            if (this._inTradeStatus !== "out") {
+                            if (this._inTradeStatus !== 'out') {
                                 result = { event: `out`, payload: this._lastRaisingCandle };
                             } else {
                                 result = { event: `change`, payload: this._lastRaisingCandle };

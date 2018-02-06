@@ -8,104 +8,168 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-let asyncLock = require('async-lock');
-const api = require("../../api");
+const asyncLock = require("async-lock");
+const redis = require("redis");
+const api = require("api");
 class StrategyBacktestService {
+    constructor() {
+        this.client = redis.createClient();
+        this.snapshots = [];
+        this.events = [];
+        this.reports = [];
+    }
     backtest(strategy, instrument) {
         return __awaiter(this, void 0, void 0, function* () {
-            // delete the snapshot
-            let tempBacktestTopicName = yield this.generateTempTopicForBacktest(strategy.id, instrument);
-            let tempCandlesTopicName = yield this.generateTempTopicForCandles(instrument, api.enums.GranularityEnum[strategy.granularity]);
-            let candleConsumer = new api.proxies.CandleConsumerProxy(tempCandlesTopicName);
-            // should await otherwise it gets the topic does not exist from this service
-            yield this.callInstrumentServiceToFetchCandles(instrument, strategy, tempCandlesTopicName);
-            this.subscribeToCandlesTopicToBacktest(candleConsumer, strategy, instrument, tempBacktestTopicName);
-            this.subscribeToBacktestTopicToHandleEvents(strategy, instrument, tempBacktestTopicName);
+            this.client.on('connect', () => __awaiter(this, void 0, void 0, function* () {
+                console.log('redis is ready!');
+                // delete the snapshot
+                const tempBacktestTopicName = yield this.generateTempTopicForBacktest(strategy.id, instrument);
+                const tempCandlesTopicName = yield this.generateTempTopicForCandles(instrument, api.enums.GranularityEnum[strategy.granularity]);
+                const candleConsumer = new api.proxies.CandleConsumerProxy(tempCandlesTopicName);
+                // should await otherwise it gets the topic does not exist from this service
+                const count = yield this.callInstrumentServiceToFetchCandles(instrument, strategy, tempCandlesTopicName);
+                yield this.subscribeToCandlesTopicToBacktest(candleConsumer, strategy, instrument, tempBacktestTopicName, count.body.count);
+                this.publishEvents(tempBacktestTopicName);
+                yield this.subscribeToBacktestTopicToHandleEvents(strategy, instrument, tempBacktestTopicName, count.body.count);
+                yield this.saveIntoDb();
+            }));
         });
     }
-    subscribeToCandlesTopicToBacktest(candleConsumer, strategy, instrument, tempBacktestTopicName) {
-        let lock = new asyncLock();
-        let key, opts = null;
-        candleConsumer.subscribe().subscribe(candle => {
-            lock.acquire(key, () => __awaiter(this, void 0, void 0, function* () {
-                yield this.process(strategy, instrument, candle, tempBacktestTopicName);
-                return;
-            }), opts).then(function () {
-                console.log('lock released');
-            }).catch(function (err) {
-                console.error(err.message);
-            });
-        }, error => { console.error(error); });
+    saveIntoDb() {
+        return __awaiter(this, void 0, void 0, function* () {
+            api.models.strategyBacktestSnapshotModel.create(this.snapshots);
+            api.models.strategyBacktestEventModel.create(this.events);
+            api.models.strategyBacktestReportModel.create(this.reports);
+        });
     }
-    subscribeToBacktestTopicToHandleEvents(strategy, instrumnet, tempBacktestTopicName) {
-        let strategyBacktestConsumer = new api.proxies.StrategyBacktestConsumerProxy(tempBacktestTopicName);
-        let model;
-        let totalPips = 0;
-        strategyBacktestConsumer.subscribe().subscribe((event) => __awaiter(this, void 0, void 0, function* () {
-            if (event.event === "long" || event.event === "short") {
-                let report = new api.models.strategyBacktestReportModel({
-                    strategyId: strategy.id,
-                    instrument: instrumnet,
-                    topic: tempBacktestTopicName,
-                    timeIn: event.time,
-                    candleIn: event.payload.close,
-                    tradeType: event.event,
-                });
-                model = yield report.save();
-            }
-            else if (event.event === "out") {
-                if (model) {
-                    model.timeOut = event.time;
-                    model.candleOut = event.payload.close;
-                    model.pips = model.tradeType === 'long' ? model.candleOut - model.candleIn : model.candleIn - model.candleOut;
-                    model.pips = model.pips * 100000;
-                    yield model.save();
+    publishEvents(tempBacktestTopicName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const producer = new api.proxies.StrategyBacktestProducerProxy(tempBacktestTopicName);
+            producer.publish(this.events);
+        });
+    }
+    subscribeToCandlesTopicToBacktest(candleConsumer, strategy, instrument, tempBacktestTopicName, count) {
+        return new Promise((resolve, reject) => {
+            const lock = new asyncLock({ maxPending: count });
+            // tslint:disable-next-line:typedef
+            const key = null;
+            // tslint:disable-next-line:typedef
+            const opts = null;
+            let localCounter = 0;
+            candleConsumer.subscribe(count).subscribe((candles) => {
+                for (const candle of candles) {
+                    lock.acquire(key, () => __awaiter(this, void 0, void 0, function* () {
+                        try {
+                            yield this.process(strategy, instrument, candle, tempBacktestTopicName);
+                            localCounter = localCounter + 1;
+                            return;
+                        }
+                        catch (err) {
+                            console.error(err);
+                            reject(err);
+                        }
+                    }), opts).then(() => {
+                        console.log('lock released');
+                        if (localCounter >= count) {
+                            resolve(true);
+                        }
+                    }).catch((err) => {
+                        console.error(err.message);
+                        reject(err);
+                    });
                 }
-            }
-        }), error => { console.error(error); });
+            }, (error) => {
+                console.error(error);
+                reject(error);
+            });
+        });
+    }
+    subscribeToBacktestTopicToHandleEvents(strategy, instrumnet, tempBacktestTopicName, count) {
+        const strategyBacktestConsumer = new api.proxies.StrategyBacktestConsumerProxy(tempBacktestTopicName);
+        // let model;
+        let report;
+        const totalPips = 0;
+        return new Promise((resolve, reject) => {
+            strategyBacktestConsumer.subscribe(count).subscribe((events) => __awaiter(this, void 0, void 0, function* () {
+                for (const event of events) {
+                    if (event.event === 'long' || event.event === 'short') {
+                        report = {
+                            strategyId: strategy.id,
+                            instrument: instrumnet,
+                            topic: tempBacktestTopicName,
+                            timeIn: event.time,
+                            candleIn: event.payload.close,
+                            tradeType: event.event,
+                        };
+                        this.reports.push(report);
+                        // let reportModel = new api.models.strategyBacktestReportModel(report);
+                        // model = await reportModel.save();
+                    }
+                    else if (event.event === 'out') {
+                        if (report) {
+                            report.timeOut = event.time;
+                            report.candleOut = event.payload.close;
+                            report.pips = report.tradeType === 'long'
+                                ? report.candleOut - report.candleIn
+                                : report.candleIn - report.candleOut;
+                            report.pips = report.pips * 100000;
+                            // await model.save();
+                        }
+                    }
+                }
+                resolve(true);
+            }), (error) => {
+                console.error(error);
+                reject(error);
+            });
+        });
     }
     callInstrumentServiceToFetchCandles(instrument, strategy, tempCandlesTopicName) {
         return __awaiter(this, void 0, void 0, function* () {
-            let proxy = new api.proxies.InstrumentProxy();
-            let count = yield proxy.getCandles(api.enums.InstrumentEnum[instrument], strategy.granularity, tempCandlesTopicName);
+            const proxy = new api.proxies.InstrumentProxy();
+            return yield proxy.getCandles(api.enums.InstrumentEnum[instrument], strategy.granularity, tempCandlesTopicName);
         });
     }
     process(strategy, instrument, candle, topicName) {
         return __awaiter(this, void 0, void 0, function* () {
             // get snapshot of strategy-backtest event from db
-            let snapshot = yield api.models.strategyBacktestSnapshotModel.findLastBacktestSnapshot(topicName);
-            let eventHandler = new api.services.RaisingCandles();
-            let time = snapshot ? snapshot.time : 0;
+            // let snapshot = await api.models.strategyBacktestSnapshotModel.findLastBacktestSnapshot(topicName);
+            const snapshot = this.snapshots.length > 0 ? this.snapshots[this.snapshots.length - 1] : null;
+            const eventHandler = new api.services.RaisingCandles();
+            const time = snapshot ? snapshot.time : 0;
             // if snapshot, then replay channel from snapshot's offset and resolve the last status
             // progress based on the last status and current candle and get the current status
             // insert the current status (snapshot) if needed into db -- needed means current status is out (maybe)
             // push the current status into channel -- finish
-            let events = yield api.models.strategyBacktestEventModel.findBacktestEventsToReplay(topicName, time);
-            let newSnapshot = eventHandler.replay(snapshot, events);
+            // let events = await api.models.strategyBacktestEventModel.findBacktestEventsToReplay(topicName, time);
+            const events = this.events.filter((x) => x.time > time);
+            const newSnapshot = eventHandler.replay(snapshot, events);
             if (newSnapshot) {
-                let snapshotDocument = new api.models.strategyBacktestSnapshotModel({
+                const snapshotToSave = {
                     topic: topicName,
                     time: newSnapshot.time,
                     payload: newSnapshot.payload,
-                });
-                yield snapshotDocument.save();
+                };
+                this.snapshots.push(snapshotToSave);
+                // let snapshotDocument = new api.models.strategyBacktestSnapshotModel(snapshot);
+                // await snapshotDocument.save();
             }
-            let result = yield eventHandler.processCandle(candle);
-            let eventDocument = new api.models.strategyBacktestEventModel({
+            const result = yield eventHandler.processCandle(candle);
+            const event = {
                 topic: topicName,
                 time: Number(candle.time),
                 isDispatched: false,
                 event: result.event,
                 payload: result.payload,
-            });
-            yield eventDocument.save();
-            let producer = new api.proxies.StrategyBacktestProducerProxy(topicName);
-            yield producer.publish();
+            };
+            this.events.push(event);
+            // let eventDocument = new api.models.strategyBacktestEventModel(event);
+            // await eventDocument.save();
         });
     }
     generateTempTopicForBacktest(strategyId, instrument) {
         return __awaiter(this, void 0, void 0, function* () {
-            let topic = `temp_${strategyId}_${Date.now()}`;
+            const topic = `temp_${strategyId}_${Date.now()}`;
             yield new api.proxies.StrategyBacktestConsumerProxy(topic).createTopic();
             return topic;
         });

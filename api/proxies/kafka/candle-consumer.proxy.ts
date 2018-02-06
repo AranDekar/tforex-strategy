@@ -27,8 +27,9 @@ export class CandleConsumerProxy {
             });
         });
     }
-    public subscribe() {
-        return new rx.Observable<api.interfaces.Candle>(x => {
+    public subscribe(count) {
+        return new rx.Observable<api.interfaces.Candle[]>(x => {
+            let items: any[] = [];
             let client = new kafka.KafkaClient({
                 kafkaHost: api.shared.Config.settings.kafka_conn_string,
             });
@@ -46,7 +47,10 @@ export class CandleConsumerProxy {
             this._consumer.on('message', async (message: any) => {
                 if (message && message.value) {
                     let item = JSON.parse(message.value);
-                    x.next(item);
+                    items.push(item);
+                }
+                if (items.length >= count) {
+                    x.next(items);
                 }
             });
             this._consumer.on('error', (err: string) => {

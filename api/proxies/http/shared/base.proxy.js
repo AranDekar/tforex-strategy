@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const api = require("../../../../api");
+const api = require("api");
 class BaseProxy {
     constructor(basePathOrUsername, password, basePath) {
         this.basePath = '';
         this.defaultHeaders = {};
-        this._useQuerystring = false;
+        this.useQuerystring = false;
         this.authentications = {
-            'default': new api.proxies.VoidAuthService(),
-            'api_key': new api.proxies.ApiKeyAuthService('header', 'api-key'),
+            default: new api.proxies.VoidAuthService(),
+            api_key: new api.proxies.ApiKeyAuthService('header', 'api-key'),
         };
         if (password) {
             if (basePath) {
@@ -21,14 +21,14 @@ class BaseProxy {
             }
         }
     }
-    set useQuerystring(value) {
-        this._useQuerystring = value;
+    set UseQuerystring(value) {
+        this.useQuerystring = value;
     }
     setApiKey(key, value) {
         this.authentications[api.proxies.DefaultApiKeysEnum[key]].apiKey = value;
     }
     extendObj(objA, objB) {
-        for (let key in objB) {
+        for (const key in objB) {
             if (objB.hasOwnProperty(key)) {
                 objA[key] = objB[key];
             }

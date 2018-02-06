@@ -12,18 +12,18 @@ const kafka = require("kafka-node");
 const rx = require("rxjs");
 const api = require("../../../api");
 class StrategyBacktestConsumerProxy {
-    constructor(_topicName) {
-        this._topicName = _topicName;
+    constructor(topicName) {
+        this.topicName = topicName;
     }
     createTopic() {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            let client = new kafka.KafkaClient({
+            const client = new kafka.KafkaClient({
                 kafkaHost: api.shared.Config.settings.kafka_conn_string,
             });
-            let producer = new kafka.Producer(client);
+            const producer = new kafka.Producer(client);
             // Create topics sync
             producer.on('ready', () => {
-                producer.createTopics([this._topicName], false, function (err, data) {
+                producer.createTopics([this.topicName], false, (err, data) => {
                     if (err) {
                         return reject(err);
                     }
@@ -75,21 +75,27 @@ class StrategyBacktestConsumerProxy {
     //         });
     //     });
     // }
-    subscribe() {
-        return new rx.Observable(x => {
-            let client = new kafka.KafkaClient({
+    subscribe(count) {
+        return new rx.Observable((x) => {
+            let items = [];
+            const client = new kafka.KafkaClient({
                 kafkaHost: api.shared.Config.settings.kafka_conn_string,
             });
-            let consumer = new kafka.Consumer(client, [
-                { topic: this._topicName, offset: 0 },
+            const consumer = new kafka.Consumer(client, [
+                { topic: this.topicName, offset: 0 },
             ], {
                 autoCommit: true,
                 fromOffset: true,
             });
             consumer.on('message', (message) => __awaiter(this, void 0, void 0, function* () {
                 if (message && message.value) {
-                    let item = JSON.parse(message.value);
-                    x.next(item);
+                    const item = JSON.parse(message.value);
+                    items.push(item);
+                }
+                if (items.length >= count) {
+                    console.log('NEXT is gonna called');
+                    x.next(items);
+                    items = [];
                 }
             }));
             consumer.on('error', (err) => {

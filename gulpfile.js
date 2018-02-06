@@ -40,6 +40,7 @@ gulp.task('tslint', function () {
             program: require('tslint').Linter.createProgram("./tsconfig.json"),
         }))
         .pipe(tslint.report({ summarizeFailureOutput: true, }));
+
 });
 
 gulp.task('deploy', function () {

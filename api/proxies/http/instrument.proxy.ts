@@ -50,7 +50,7 @@ export class InstrumentProxy extends proxies.BaseProxy {
             qs: queryParameters,
             headers: headerParams,
             uri: localVarPath,
-            useQuerystring: this._useQuerystring,
+            useQuerystring: this.useQuerystring,
             json: true,
         };
 

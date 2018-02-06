@@ -1,19 +1,20 @@
 import { Document, Schema, Model } from 'mongoose';
 import * as api from '../../api';
 
-let mongoose = api.shared.DataAccess.mongooseInstance;
-
-export interface StrategySnapshotDocument extends Document {
+const mongoose = api.shared.DataAccess.mongooseInstance;
+export interface StrategySnapshot {
     topic: string;
     time: number;
     payload: any;
+}
+export interface StrategySnapshotDocument extends StrategySnapshot, Document {
 }
 export interface StrategySnapshotDocumentOperations extends Model<StrategySnapshotDocument> {
     findLastBacktestSnapshot(topic: string): Promise<StrategySnapshotDocument>;
     findLastLiveSnapshot(topic: string): Promise<StrategySnapshotDocument>;
 }
 
-let schema = new Schema({
+const schema = new Schema({
     topic: { type: String },
     time: { type: Number },
     payload: { type: Schema.Types.Mixed },
@@ -21,18 +22,18 @@ let schema = new Schema({
 
 schema.statics.findLastBacktestSnapshot = async (topic: string) => {
     return strategyBacktestSnapshotModel
-        .findOne({ topic: topic })
-        .sort({ 'time': -1 })
+        .findOne({ topic })
+        .sort({ time: -1 })
         .exec();
 };
 schema.statics.findLastLiveSnapshot = async (topic: string) => {
     return strategyLiveSnapshotModel
-        .findOne({ topic: topic })
-        .sort({ 'time': -1 })
+        .findOne({ topic })
+        .sort({ time: -1 })
         .exec();
 };
 
-export const strategyLiveSnapshotModel = <StrategySnapshotDocumentOperations>mongoose.model<StrategySnapshotDocument>(
-    'strategy_live_snapshot', schema);
-export const strategyBacktestSnapshotModel = <StrategySnapshotDocumentOperations>mongoose.model<StrategySnapshotDocument>(
-    'strategy_backtest_snapshot', schema);
+export const strategyLiveSnapshotModel = mongoose.model<StrategySnapshotDocument>(
+    'strategy_live_snapshot', schema) as StrategySnapshotDocumentOperations;
+export const strategyBacktestSnapshotModel = mongoose.model<StrategySnapshotDocument>(
+    'strategy_backtest_snapshot', schema) as StrategySnapshotDocumentOperations;

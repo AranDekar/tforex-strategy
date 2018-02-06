@@ -1,13 +1,13 @@
-import * as api from '../../../../api';
+import * as api from 'api';
 
 export class BaseProxy {
     protected basePath = '';
     protected defaultHeaders: any = {};
-    protected _useQuerystring = false;
+    protected useQuerystring = false;
 
     protected authentications = {
-        'default': <api.proxies.Authentication>new api.proxies.VoidAuthService(),
-        'api_key': new api.proxies.ApiKeyAuthService('header', 'api-key'),
+        default: new api.proxies.VoidAuthService() as api.proxies.Authentication,
+        api_key: new api.proxies.ApiKeyAuthService('header', 'api-key'),
     };
 
     constructor(basePath?: string);
@@ -23,8 +23,8 @@ export class BaseProxy {
         }
     }
 
-    protected set useQuerystring(value: boolean) {
-        this._useQuerystring = value;
+    protected set UseQuerystring(value: boolean) {
+        this.useQuerystring = value;
     }
 
     protected setApiKey(key: api.proxies.DefaultApiKeysEnum, value: string) {
@@ -32,7 +32,7 @@ export class BaseProxy {
     }
 
     protected extendObj<T1, T2 extends T1>(objA: T1 & T2, objB: T2): T1 & T2 {
-        for (let key in objB) {
+        for (const key in objB) {
             if (objB.hasOwnProperty(key)) {
                 objA[key] = objB[key];
             }
