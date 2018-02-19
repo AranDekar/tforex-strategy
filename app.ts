@@ -14,7 +14,7 @@ let corsOptions = {
 let config = {
     appRoot: __dirname, // required config
     swaggerSecurityHandlers: {
-        api_key: function (req, authOrSecDef, scopesOrApiKey, cb) {
+        api_key(req, authOrSecDef, scopesOrApiKey, cb) {
             console.log('in apiKeySecurity (req: ' + JSON.stringify(req.headers) + ', def: ' +
                 JSON.stringify(authOrSecDef) + ', scopes: ' + scopesOrApiKey + ')');
 
@@ -28,16 +28,15 @@ let config = {
     },
 };
 
-
-swaggerExpressMw.create(config, function (err, swaggerExpress) {
+swaggerExpressMw.create(config, (err, swaggerExpress) => {
     if (err) { throw err; }
 
     app.use(cors(corsOptions));
     swaggerExpress.register(app);
 
-    let port = process.env.PORT || 3000;
+    const port = process.env.PORT || 10030;
 
-    app.use(function (req, res, next) {
+    app.use((req, res, next) => {
         next();
     });
 

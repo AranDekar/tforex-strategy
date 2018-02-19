@@ -1,33 +1,33 @@
 {
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Launch",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/app.js",
-            "stopOnEntry": false,
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "preLaunchTask": null,
-            "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
-            "env": {
-                "NODE_ENV": "development",
-                "KAFKA": "kafka:9092",
-                "MONGO": "mongodb://127.0.0.1:27017/tforex",
-                "PORT": "10030"
-            },
-            "smartStep": true,
-            "sourceMaps": true,
-            "outFiles": []
-        },
+        // {
+        //     "name": "Launch",
+        //     "type": "node",
+        //     "request": "launch",
+        //     "program": "${workspaceRoot}/app.js",
+        //     "stopOnEntry": false,
+        //     "args": [],
+        //     "cwd": "${workspaceRoot}",
+        //     "preLaunchTask": null,
+        //     "runtimeExecutable": null,
+        //     "runtimeArgs": [
+        //         "--nolazy"
+        //     ],
+        //     "env": {
+        //         "NODE_ENV": "development",
+        //         "KAFKA": "kafka:9092",
+        //         "MONGO": "mongodb://127.0.0.1:27017/tforex",
+        //         "PORT": "10030"
+        //     },
+        //     "smartStep": true,
+        //     "sourceMaps": true,
+        //     "outFiles": []
+        // },
         {
             "type": "node",
             "request": "attach",
-            "name": "Node: Nodemon",
+            "name": "nodemon-strategy",
             // "processId": "${command:PickProcess}",
             "restart": true,
             "protocol": "inspector",
