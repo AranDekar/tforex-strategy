@@ -1,3 +1,3 @@
 export enum InstrumentEnum {
-    AUD_USD = <any>'AUD_USD',
+    AUD_USD = 'AUD_USD' as any,
 }

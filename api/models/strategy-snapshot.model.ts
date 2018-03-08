@@ -4,7 +4,7 @@ import * as api from '../../api';
 const mongoose = api.shared.DataAccess.mongooseInstance;
 export interface StrategySnapshot {
     topic: string;
-    time: number;
+    time: Date;
     payload: any;
 }
 export interface StrategySnapshotDocument extends StrategySnapshot, Document {
@@ -16,7 +16,7 @@ export interface StrategySnapshotDocumentOperations extends Model<StrategySnapsh
 
 const schema = new Schema({
     topic: { type: String },
-    time: { type: Number },
+    time: { type: Date },
     payload: { type: Schema.Types.Mixed },
 });
 

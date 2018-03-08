@@ -14,10 +14,11 @@ const mongoose = api.shared.DataAccess.mongooseInstance;
 const schema = new mongoose_1.Schema({
     topic: { type: String, index: true },
     isDispatched: { type: Boolean, default: false },
-    time: { type: Number },
+    time: { type: Date },
     event: { type: String },
     payload: { type: mongoose_1.Schema.Types.Mixed },
 });
+schema.index({ time: 1 }); // schema level ascending index on candleTime
 schema.statics.findUndispatchedBacktestEvents = (topic) => __awaiter(this, void 0, void 0, function* () {
     return exports.strategyBacktestEventModel
         .find({ isDispatched: false, topic })

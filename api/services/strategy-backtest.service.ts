@@ -2,35 +2,41 @@ import * as asyncLock from 'async-lock';
 import * as redis from 'redis';
 
 import * as api from 'api';
+import { InstrumentEvent } from '../interfaces';
+import { InstrumentEventEnum } from '../enums';
 
+enum StrategyStatusEnum {
+    in_buy,
+    in_sell,
+    exited,
+}
 export class StrategyBacktestService {
     private client: redis.RedisClient = redis.createClient();
     private snapshots: api.models.StrategySnapshot[] = [];
     private events: api.models.StrategyEvent[] = [];
     private reports: api.models.StrategyBcktestReport[] = [];
+    private strategyPayload: any = {};
+    private strategyStatus: StrategyStatusEnum;
 
-    public async backtest(strategy: api.models.StrategyDocument, instrument: api.enums.InstrumentEnum): Promise<void> {
+    public async backtest(strategyId: string, instrument: api.enums.InstrumentEnum): Promise<void> {
         this.client.on('connect', async () => {
             console.log('redis is ready!');
+            const strategy = await api.models.strategyModel.findById(strategyId);
+            if (strategy === null) {
+                throw new Error('strategy not found!');
+            }
+            let stillInLoop = true;
+            let candleTime: Date = new Date('1900-01-01');
+            do {
 
-            // delete the snapshot
-            const tempBacktestTopicName: string = await this.generateTempTopicForBacktest(strategy.id, instrument);
-            const tempCandlesTopicName: string = await this.generateTempTopicForCandles(
-                instrument,
-                api.enums.GranularityEnum[strategy.granularity]);
-            const candleConsumer = new api.proxies.CandleConsumerProxy(tempCandlesTopicName);
+                const events = await this.getInstrumentEvents(instrument, candleTime, strategy.events);
 
-            // should await otherwise it gets the topic does not exist from this service
-            const count: { body: { count: number } } = await this.callInstrumentServiceToFetchCandles(
-                instrument, strategy, tempCandlesTopicName);
-
-            await this.subscribeToCandlesTopicToBacktest(candleConsumer, strategy,
-                instrument, tempBacktestTopicName, count.body.count);
-
-            this.publishEvents(tempBacktestTopicName);
-
-            await this.subscribeToBacktestTopicToHandleEvents(
-                strategy, instrument, tempBacktestTopicName, count.body.count);
+                for (const event of events) {
+                    await this.process(strategy, event);
+                    candleTime = event.candleTime;
+                }
+                stillInLoop = events.length === 0;
+            } while (stillInLoop);
 
             await this.saveIntoDb();
 
@@ -46,47 +52,6 @@ export class StrategyBacktestService {
     private async publishEvents(tempBacktestTopicName: string): Promise<void> {
         const producer = new api.proxies.StrategyBacktestProducerProxy(tempBacktestTopicName);
         producer.publish(this.events);
-    }
-
-    private subscribeToCandlesTopicToBacktest(
-        candleConsumer: api.proxies.CandleConsumerProxy,
-        strategy: api.models.StrategyDocument,
-        instrument: api.enums.InstrumentEnum, tempBacktestTopicName: string, count: number): Promise<{}> {
-        return new Promise((resolve, reject) => {
-            const lock: asyncLock = new asyncLock({ maxPending: count });
-            // tslint:disable-next-line:typedef
-            const key = null;
-            // tslint:disable-next-line:typedef
-            const opts = null;
-            let localCounter: number = 0;
-            candleConsumer.subscribe(count).subscribe((candles: api.interfaces.Candle[]) => {
-                for (const candle of candles) {
-                    lock.acquire(key, async () => {
-                        try {
-                            await this.process(strategy, instrument, candle, tempBacktestTopicName);
-                            localCounter = localCounter + 1;
-
-                            return;
-                        } catch (err) {
-                            console.error(err);
-
-                            reject(err);
-                        }
-                    }, opts).then(() => {
-                        console.log('lock released');
-                        if (localCounter >= count) {
-                            resolve(true);
-                        }
-                    }).catch((err) => {
-                        console.error(err.message);
-                        reject(err);
-                    });
-                }
-            }, (error) => {
-                console.error(error);
-                reject(error);
-            });
-        });
     }
 
     private subscribeToBacktestTopicToHandleEvents(
@@ -133,55 +98,74 @@ export class StrategyBacktestService {
         });
     }
 
-    private async callInstrumentServiceToFetchCandles(
+    private async getInstrumentEvents(
         instrument: api.enums.InstrumentEnum,
-        strategy: api.models.StrategyDocument,
-        tempCandlesTopicName: string) {
+        candleTime: Date,
+        events: InstrumentEventEnum[]) {
         const proxy = new api.proxies.InstrumentProxy();
-        return await proxy.getCandles(api.enums.InstrumentEnum[instrument], strategy.granularity, tempCandlesTopicName);
+        const eventsString = events.join(',');
+        const result = await proxy.getEvents(api.enums.InstrumentEnum[instrument], candleTime, eventsString);
+        return result.body;
     }
 
-    private async process(
-        strategy: api.models.StrategyDocument, instrument: api.enums.InstrumentEnum,
-        candle: api.interfaces.Candle, topicName: string) {
+    private async process(strategy: api.models.StrategyDocument, instrumentEvent: InstrumentEvent) {
 
-        // get snapshot of strategy-backtest event from db
+        const strategyProcess = new api.services.RaisingCandles();
 
-        // let snapshot = await api.models.strategyBacktestSnapshotModel.findLastBacktestSnapshot(topicName);
-        const snapshot = this.snapshots.length > 0 ? this.snapshots[this.snapshots.length - 1] : null;
+        const result = await strategyProcess.execute(this.strategyPayload, instrumentEvent,
+            () => { // exit
+                if (this.strategyStatus !== StrategyStatusEnum.exited) {
+                    const eventItem: api.models.StrategyEvent = {
+                        event: StrategyStatusEnum[StrategyStatusEnum.exited],
+                        isDispatched: false,
+                        payload: {
+                            ...this.strategyPayload,
+                            bid: instrumentEvent.candleBid,
+                            ask: instrumentEvent.candleAsk,
+                        },
+                        time: new Date(),
+                        topic: 'test',
+                    };
+                    this.events.push(eventItem);
+                    this.strategyStatus = StrategyStatusEnum.exited;
+                }
+            },
+            () => { // buy
+                if (this.strategyStatus !== StrategyStatusEnum.in_buy) {
+                    const eventItem: api.models.StrategyEvent = {
+                        event: StrategyStatusEnum[StrategyStatusEnum.in_buy],
+                        isDispatched: false,
+                        payload: {
+                            ...this.strategyPayload,
+                            bid: instrumentEvent.candleBid,
+                            ask: instrumentEvent.candleAsk,
+                        },
+                        time: new Date(),
+                        topic: 'test',
+                    };
+                    this.events.push(eventItem);
+                    this.strategyStatus = StrategyStatusEnum.in_buy;
+                }
+            },
+            () => { // sell
+                if (this.strategyStatus !== StrategyStatusEnum.in_sell) {
+                    const eventItem: api.models.StrategyEvent = {
+                        event: StrategyStatusEnum[StrategyStatusEnum.in_sell],
+                        isDispatched: false,
+                        payload: {
+                            ...this.strategyPayload,
+                            bid: instrumentEvent.candleBid,
+                            ask: instrumentEvent.candleAsk,
+                        },
+                        time: new Date(),
+                        topic: 'test',
+                    };
+                    this.events.push(eventItem);
+                    this.strategyStatus = StrategyStatusEnum.in_sell;
+                }
+            },
+        );
 
-        const eventHandler = new api.services.RaisingCandles();
-        const time: number = snapshot ? snapshot.time : 0;
-
-        // if snapshot, then replay channel from snapshot's offset and resolve the last status
-        // progress based on the last status and current candle and get the current status
-        // insert the current status (snapshot) if needed into db -- needed means current status is out (maybe)
-        // push the current status into channel -- finish
-
-        // let events = await api.models.strategyBacktestEventModel.findBacktestEventsToReplay(topicName, time);
-        const events = this.events.filter((x) => x.time > time);
-
-        const newSnapshot = eventHandler.replay(snapshot, events);
-        if (newSnapshot) {
-            const snapshotToSave = {
-                topic: topicName,
-                time: newSnapshot.time,
-                payload: newSnapshot.payload,
-            };
-            this.snapshots.push(snapshotToSave);
-            // let snapshotDocument = new api.models.strategyBacktestSnapshotModel(snapshot);
-            // await snapshotDocument.save();
-
-        }
-        const result = await eventHandler.processCandle(candle);
-        const event = {
-            topic: topicName,
-            time: Number(candle.time),
-            isDispatched: false,
-            event: result.event,
-            payload: result.payload,
-        };
-        this.events.push(event);
         // let eventDocument = new api.models.strategyBacktestEventModel(event);
         // await eventDocument.save();
     }

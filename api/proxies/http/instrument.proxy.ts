@@ -3,49 +3,43 @@ import * as request from 'request';
 
 import * as api from '../../../api';
 import * as proxies from '../../proxies';
+import { InstrumentEvent } from '../../interfaces';
 
 export class InstrumentProxy extends proxies.BaseProxy {
     constructor() {
         super(api.shared.Config.settings.instruments_base_path);
     }
-    /**
-         * gets the LAST candle of an instrument by granularity
-         * @param instrument the instrument of the candles
-         * @param granularity the granularity in which the candles are fetched
-         * @param topic the candles will be published into this topic
-         */
-    public async getCandles(instrument: string, granularity: string, topic: string):
-        Promise<{
-            response: http.ClientResponse; body: { 'count': number; }
-            ;
-        }> {
-        const localVarPath = this.basePath + '/{instrument}/candles/{granularity}/publish/{topic}'
-            .replace('{' + 'instrument' + '}', String(instrument))
-            .replace('{' + 'granularity' + '}', String(granularity))
-            .replace('{' + 'topic' + '}', String(topic));
-        let queryParameters: any = {};
-        let headerParams: any = (<any>Object).assign({}, this.defaultHeaders);
-        let formParams: any = {};
-
+    /*
+      * gets limited number of events of an instrument
+      * @param instrument the instrument of the candles
+      * @param candleTime if provided, the limited number of events are returned where their candle
+      * time is greater than this
+      * @param events a comma separated list of events that are required to return
+      */
+    public getEvents(instrument: string, candleTime?: Date, events?: string):
+        Promise<{ response: http.ClientResponse; body: Array<InstrumentEvent>; }> {
+        const localVarPath = this.basePath + '/instruments/{instrument}/events'
+            .replace('{' + 'instrument' + '}', String(instrument));
+        const queryParameters: any = {};
+        const headerParams: any = (Object as any).assign({}, this.defaultHeaders);
+        const formParams: any = {};
 
         // verify required parameter 'instrument' is not null or undefined
         if (instrument === null || instrument === undefined) {
-            throw new Error('Required parameter instrument was null or undefined when calling getCandles.');
+            throw new Error('Required parameter instrument was null or undefined when calling getEvents.');
         }
 
-        // verify required parameter 'granularity' is not null or undefined
-        if (granularity === null || granularity === undefined) {
-            throw new Error('Required parameter granularity was null or undefined when calling getCandles.');
+        if (candleTime !== undefined) {
+            queryParameters.candleTime = candleTime;
         }
 
-        // verify required parameter 'topic' is not null or undefined
-        if (topic === null || topic === undefined) {
-            throw new Error('Required parameter topic was null or undefined when calling getCandles.');
+        if (events !== undefined) {
+            queryParameters.events = events;
         }
 
-        let useFormData = false;
+        const useFormData = false;
 
-        let requestOptions: request.Options = {
+        const requestOptions: request.Options = {
             method: 'GET',
             qs: queryParameters,
             headers: headerParams,
@@ -60,20 +54,20 @@ export class InstrumentProxy extends proxies.BaseProxy {
 
         if (Object.keys(formParams).length) {
             if (useFormData) {
-                (<any>requestOptions).formData = formParams;
+                (requestOptions as any).formData = formParams;
             } else {
                 requestOptions.form = formParams;
             }
         }
-        return new Promise<{ response: http.ClientResponse; body: { 'count': number; }; }>((resolve, reject) => {
+        return new Promise<{ response: http.ClientResponse; body: Array<InstrumentEvent>; }>((resolve, reject) => {
             request(requestOptions, (error, response, body) => {
                 if (error) {
                     reject(error);
                 } else {
                     if (response.statusCode >= 200 && response.statusCode <= 299) {
-                        resolve({ response: response, body: body });
+                        resolve({ response, body });
                     } else {
-                        reject({ response: response, body: body });
+                        reject({ response, body });
                     }
                 }
             });

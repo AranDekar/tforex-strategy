@@ -14,9 +14,9 @@ function get(req, res) {
         // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
         // let _id = req.swagger.params._id.value;
         try {
-            let result = [];
-            let service = new api.services.StrategyService();
-            let data = yield service.getAll();
+            const result = [];
+            const service = new api.services.StrategyService();
+            const data = yield service.getAll();
             res.json(data);
         }
         catch (err) {
@@ -28,27 +28,20 @@ exports.get = get;
 function post(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-        let service = new api.services.StrategyService();
-        let model = yield service.create(req.body);
+        const service = new api.services.StrategyService();
+        const model = yield service.create(req.body);
         res.json(model);
     });
 }
 exports.post = post;
 function backtest(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        let instrument = req.swagger.params.instrument.value;
-        let strategy = req.swagger.params.strategy.value;
+        const instrument = req.swagger.params.instrument.value;
+        const strategy = req.swagger.params.strategy.value;
         try {
-            let strategyService = new api.services.StrategyService();
-            let backtestService = new api.services.StrategyBacktestService();
-            let strategyDocument = yield strategyService.getById(strategy);
-            if (strategyDocument) {
-                yield backtestService.backtest(strategyDocument, instrument);
-                res.status(200).send({ message: 'backtesting strategy' });
-            }
-            else {
-                throw new Error('strategy not found!');
-            }
+            const backtestService = new api.services.StrategyBacktestService();
+            yield backtestService.backtest(strategy, instrument);
+            res.status(200).send({ message: 'backtesting strategy' });
         }
         catch (err) {
             res.statusCode = 500; // internal server error

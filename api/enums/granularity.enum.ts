@@ -1,8 +1,8 @@
 export enum GranularityEnum {
-    M5 = <any>'M5',
-    M15 = <any>'M15',
-    M30 = <any>'M30',
-    H1 = <any>'H1',
-    H4 = <any>'H4',
-    D1 = <any>'D1',
+    M5 = 'M5' as any,
+    M15 = 'M15' as any,
+    M30 = 'M30' as any,
+    H1 = 'H1' as any,
+    H4 = 'H4' as any,
+    D1 = 'D1' as any,
 }

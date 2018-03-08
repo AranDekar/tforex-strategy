@@ -12,10 +12,7 @@ class Config {
                 gateway_base_path: 'http://localhost:10020',
                 strategies_base_path: 'http://localhost:10030/strategies',
                 instruments_base_path: 'http://127.0.0.1:10040/instruments',
-                // mongo_db_connection_string: `mongodb://tforex-user:tforex-password@cluster0-shard-00-00-tyqk3.mongodb.net:27017,` +
-                // `cluster0-shard-00-01-tyqk3.mongodb.net:27017,cluster0-shard-00-02-tyqk3.mongodb.net:27017/tforex?` +
-                // `ssl=true&replicaSet=Cluster0-shard-0&authSource=admin`,
-                mongo_db_connection_string: process.env.MONGO || `mongodb://mongodb/tforex`,
+                mongo_db_connection_string: process.env.MONGO || `mongodb://mongodb/tss`,
                 api_key: '1234',
                 kafka_conn_string: process.env.KAFKA || 'kafka:9092',
                 candle_history_client_id: 'candle-history',

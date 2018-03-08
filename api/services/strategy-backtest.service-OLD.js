@@ -8,40 +8,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const asyncLock = require("async-lock");
 const redis = require("redis");
 const api = require("api");
-var StrategyStatusEnum;
-(function (StrategyStatusEnum) {
-    StrategyStatusEnum[StrategyStatusEnum["in_buy"] = 0] = "in_buy";
-    StrategyStatusEnum[StrategyStatusEnum["in_sell"] = 1] = "in_sell";
-    StrategyStatusEnum[StrategyStatusEnum["exited"] = 2] = "exited";
-})(StrategyStatusEnum || (StrategyStatusEnum = {}));
-class StrategyBacktestService {
+class StrategyBacktestServiceOLD {
     constructor() {
         this.client = redis.createClient();
         this.snapshots = [];
         this.events = [];
         this.reports = [];
-        this.strategyPayload = {};
     }
-    backtest(strategyId, instrument) {
+    backtest(strategy, instrument) {
         return __awaiter(this, void 0, void 0, function* () {
             this.client.on('connect', () => __awaiter(this, void 0, void 0, function* () {
                 console.log('redis is ready!');
-                const strategy = yield api.models.strategyModel.findById(strategyId);
-                if (strategy === null) {
-                    throw new Error('strategy not found!');
-                }
-                let stillInLoop = true;
-                let candleTime = new Date('1900-01-01');
-                do {
-                    const events = yield this.getInstrumentEvents(instrument, candleTime, strategy.events);
-                    for (const event of events) {
-                        yield this.process(strategy, event);
-                        candleTime = event.candleTime;
-                    }
-                    stillInLoop = events.length === 0;
-                } while (stillInLoop);
+                // delete the snapshot
+                const tempBacktestTopicName = yield this.generateTempTopicForBacktest(strategy.id, instrument);
+                const tempCandlesTopicName = yield this.generateTempTopicForCandles(instrument, api.enums.GranularityEnum[strategy.granularity]);
+                const candleConsumer = new api.proxies.CandleConsumerProxy(tempCandlesTopicName);
+                // should await otherwise it gets the topic does not exist from this service
+                const count = yield this.callInstrumentServiceToFetchCandles(instrument, strategy, tempCandlesTopicName);
+                yield this.subscribeToCandlesTopicToBacktest(candleConsumer, strategy, instrument, tempBacktestTopicName, count.body.count);
+                this.publishEvents(tempBacktestTopicName);
+                yield this.subscribeToBacktestTopicToHandleEvents(strategy, instrument, tempBacktestTopicName, count.body.count);
                 yield this.saveIntoDb();
             }));
         });
@@ -57,6 +46,42 @@ class StrategyBacktestService {
         return __awaiter(this, void 0, void 0, function* () {
             const producer = new api.proxies.StrategyBacktestProducerProxy(tempBacktestTopicName);
             producer.publish(this.events);
+        });
+    }
+    subscribeToCandlesTopicToBacktest(candleConsumer, strategy, instrument, tempBacktestTopicName, count) {
+        return new Promise((resolve, reject) => {
+            const lock = new asyncLock({ maxPending: count });
+            // tslint:disable-next-line:typedef
+            const key = null;
+            // tslint:disable-next-line:typedef
+            const opts = null;
+            let localCounter = 0;
+            candleConsumer.subscribe(count).subscribe((candles) => {
+                for (const candle of candles) {
+                    lock.acquire(key, () => __awaiter(this, void 0, void 0, function* () {
+                        try {
+                            yield this.process(strategy, instrument, candle, tempBacktestTopicName);
+                            localCounter = localCounter + 1;
+                            return;
+                        }
+                        catch (err) {
+                            console.error(err);
+                            reject(err);
+                        }
+                    }), opts).then(() => {
+                        console.log('lock released');
+                        if (localCounter >= count) {
+                            resolve(true);
+                        }
+                    }).catch((err) => {
+                        console.error(err.message);
+                        reject(err);
+                    });
+                }
+            }, (error) => {
+                console.error(error);
+                reject(error);
+            });
         });
     }
     subscribeToBacktestTopicToHandleEvents(strategy, instrumnet, tempBacktestTopicName, count) {
@@ -99,54 +124,47 @@ class StrategyBacktestService {
             });
         });
     }
-    getInstrumentEvents(instrument, candleTime, events) {
+    callInstrumentServiceToFetchCandles(instrument, strategy, tempCandlesTopicName) {
         return __awaiter(this, void 0, void 0, function* () {
             const proxy = new api.proxies.InstrumentProxy();
-            const eventsString = events.join(',');
-            const result = yield proxy.getEvents(api.enums.InstrumentEnum[instrument], candleTime, eventsString);
-            return result.body;
+            // return await proxy.getCandles(api.enums.InstrumentEnum[instrument], strategy.granularity,
+            //  tempCandlesTopicName);
+            return { body: { count: 10 } };
         });
     }
-    process(strategy, instrumentEvent) {
+    process(strategy, instrument, candle, topicName) {
         return __awaiter(this, void 0, void 0, function* () {
-            const strategyProcess = new api.services.RaisingCandles();
-            const result = yield strategyProcess.execute(this.strategyPayload, instrumentEvent, () => {
-                if (this.strategyStatus !== StrategyStatusEnum.exited) {
-                    const eventItem = {
-                        event: StrategyStatusEnum[StrategyStatusEnum.exited],
-                        isDispatched: false,
-                        payload: Object.assign({}, this.strategyPayload, { bid: instrumentEvent.candleBid, ask: instrumentEvent.candleAsk }),
-                        time: new Date(),
-                        topic: 'test',
-                    };
-                    this.events.push(eventItem);
-                    this.strategyStatus = StrategyStatusEnum.exited;
-                }
-            }, () => {
-                if (this.strategyStatus !== StrategyStatusEnum.in_buy) {
-                    const eventItem = {
-                        event: StrategyStatusEnum[StrategyStatusEnum.in_buy],
-                        isDispatched: false,
-                        payload: Object.assign({}, this.strategyPayload, { bid: instrumentEvent.candleBid, ask: instrumentEvent.candleAsk }),
-                        time: new Date(),
-                        topic: 'test',
-                    };
-                    this.events.push(eventItem);
-                    this.strategyStatus = StrategyStatusEnum.in_buy;
-                }
-            }, () => {
-                if (this.strategyStatus !== StrategyStatusEnum.in_sell) {
-                    const eventItem = {
-                        event: StrategyStatusEnum[StrategyStatusEnum.in_sell],
-                        isDispatched: false,
-                        payload: Object.assign({}, this.strategyPayload, { bid: instrumentEvent.candleBid, ask: instrumentEvent.candleAsk }),
-                        time: new Date(),
-                        topic: 'test',
-                    };
-                    this.events.push(eventItem);
-                    this.strategyStatus = StrategyStatusEnum.in_sell;
-                }
-            });
+            // get snapshot of strategy-backtest event from db
+            // let snapshot = await api.models.strategyBacktestSnapshotModel.findLastBacktestSnapshot(topicName);
+            const snapshot = this.snapshots.length > 0 ? this.snapshots[this.snapshots.length - 1] : null;
+            const eventHandler = new api.services.RaisingCandles();
+            const time = snapshot ? snapshot.time : new Date(1900, 1, 1);
+            // if snapshot, then replay channel from snapshot's offset and resolve the last status
+            // progress based on the last status and current candle and get the current status
+            // insert the current status (snapshot) if needed into db -- needed means current status is out (maybe)
+            // push the current status into channel -- finish
+            // let events = await api.models.strategyBacktestEventModel.findBacktestEventsToReplay(topicName, time);
+            const events = this.events.filter((x) => x.time > time);
+            const newSnapshot = eventHandler.replay(snapshot, events);
+            if (newSnapshot) {
+                const snapshotToSave = {
+                    topic: topicName,
+                    time: newSnapshot.time,
+                    payload: newSnapshot.payload,
+                };
+                this.snapshots.push(snapshotToSave);
+                // let snapshotDocument = new api.models.strategyBacktestSnapshotModel(snapshot);
+                // await snapshotDocument.save();
+            }
+            const result = yield eventHandler.processCandle(candle);
+            const event = {
+                topic: topicName,
+                time: candle.time,
+                isDispatched: false,
+                event: result.event,
+                payload: result.payload,
+            };
+            this.events.push(event);
             // let eventDocument = new api.models.strategyBacktestEventModel(event);
             // await eventDocument.save();
         });
@@ -174,5 +192,5 @@ class StrategyBacktestService {
         });
     }
 }
-exports.StrategyBacktestService = StrategyBacktestService;
-//# sourceMappingURL=strategy-backtest.service.js.map
+exports.StrategyBacktestServiceOLD = StrategyBacktestServiceOLD;
+//# sourceMappingURL=strategy-backtest.service-OLD.js.map

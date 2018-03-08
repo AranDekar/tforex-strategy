@@ -1,7 +1,9 @@
 
 import * as api from '../../../api';
+import { InstrumentEventEnum } from '../../enums';
 
 export class RaisingCandles {
+
     get SnapshotPayload() {
         return this.snapshotPayload;
     }
@@ -60,6 +62,26 @@ export class RaisingCandles {
         }
         return null;
     }
+
+    public async execute(
+        payload: any, instrumentEvent: api.interfaces.InstrumentEvent,
+        exit: () => void, buy: () => void, sell: () => void):
+        Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            if (instrumentEvent.event === InstrumentEventEnum.h4_line_break_closed) {
+                if (instrumentEvent.payload.number === 1) {
+                    exit();
+                    if (instrumentEvent.payload.color === 'red') {
+                        sell();
+                    } else {
+                        buy();
+                    }
+                }
+            }
+            resolve();
+        });
+    }
+
     public processCandle(candle: api.interfaces.Candle): Promise<{ event: string, payload: any }> {
         let result: { event: string, payload: any } = { event: '', payload: null };
         return new Promise((resolve, reject) => {

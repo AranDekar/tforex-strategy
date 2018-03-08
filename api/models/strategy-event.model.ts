@@ -6,7 +6,7 @@ const mongoose = api.shared.DataAccess.mongooseInstance;
 export interface StrategyEvent {
     topic: string;
     isDispatched: boolean;
-    time: number;
+    time: Date;
     event: string;
     payload: any;
 }
@@ -21,10 +21,12 @@ export interface StrategyEventDocumentOperations extends Model<StrategyEventDocu
 const schema = new Schema({
     topic: { type: String, index: true },
     isDispatched: { type: Boolean, default: false },
-    time: { type: Number },
+    time: { type: Date },
     event: { type: String },
     payload: { type: Schema.Types.Mixed },
 });
+
+schema.index({ time: 1 }); // schema level ascending index on candleTime
 
 schema.statics.findUndispatchedBacktestEvents = async (topic: string) => {
     return strategyBacktestEventModel

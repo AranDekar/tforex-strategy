@@ -9,6 +9,6 @@ export interface Candle {
     lowBid: number;
     openAsk: number;
     openBid: number;
-    time: string;
+    time: Date;
     volume: number;
 }

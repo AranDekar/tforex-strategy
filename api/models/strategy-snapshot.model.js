@@ -13,7 +13,7 @@ const api = require("../../api");
 const mongoose = api.shared.DataAccess.mongooseInstance;
 const schema = new mongoose_1.Schema({
     topic: { type: String },
-    time: { type: Number },
+    time: { type: Date },
     payload: { type: mongoose_1.Schema.Types.Mixed },
 });
 schema.statics.findLastBacktestSnapshot = (topic) => __awaiter(this, void 0, void 0, function* () {
