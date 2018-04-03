@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-let asyncLock = require('async-lock');
+const asyncLock = require('async-lock');
 const api = require("../../api");
 class StrategyService {
     getAll() {
@@ -23,9 +23,20 @@ class StrategyService {
     }
     create(strategy) {
         return __awaiter(this, void 0, void 0, function* () {
-            let model = new api.models.strategyModel(strategy);
+            const model = new api.models.strategyModel(strategy);
             yield model.save();
             return model;
+        });
+    }
+    setEvents(id, events) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.getById(id);
+            if (!data) {
+                throw new Error('strategy not found!');
+            }
+            data.events = events;
+            yield data.save();
+            return data;
         });
     }
 }

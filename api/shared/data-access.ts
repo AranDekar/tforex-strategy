@@ -1,4 +1,4 @@
-import { Mongoose } from "mongoose";
+import { Mongoose } from 'mongoose';
 
 import * as shared from '../shared';
 
@@ -12,13 +12,11 @@ export class DataAccess {
 
         // mongoose
         this.mongooseInstance = new Mongoose();
-        (<any>this.mongooseInstance).Promise = global.Promise;
-        this.mongooseInstance.connection.once("open", () => {
-            console.log("Conected to mongodb.");
+        (this.mongooseInstance as any).Promise = global.Promise;
+        this.mongooseInstance.connection.once('open', () => {
+            console.log('Conected to mongodb.');
         });
-        this.mongooseInstance.connect(shared.Config.settings.mongo_db_connection_string, {
-            useMongoClient: true,
-        });
+        this.mongooseInstance.connect(shared.Config.settings.mongo_db_connection_string);
         return this.mongooseInstance;
     }
 

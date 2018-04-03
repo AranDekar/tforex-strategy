@@ -5,7 +5,7 @@ info:
 # during dev, should point to your local machine
 host: localhost:10030
 # basePath prefixes all resource paths 
-basePath: /strategies
+basePath: /
 # 
 schemes:
   # tip: remove http to make production-grade
@@ -17,14 +17,13 @@ consumes:
 # format of the responses to the client (Accepts)
 produces:
   - application/json
-
 securityDefinitions:
   api_key:
     type: apiKey
     in: header
     name: api-key
 paths:
-  /:
+  /strategies:
     x-swagger-router-controller: strategy.controller
     get:
       tags: 
@@ -73,7 +72,61 @@ paths:
           description: OK - created successfully
           schema: 
             $ref: "#/definitions/Strategy"
-  /backtest:
+  /strategy/events:
+    x-swagger-router-controller: strategy-event.controller
+    get:
+      tags: 
+        - strategy-event
+      security:
+        - api_key: []
+      description: Returns the events where the strategy hooked up to
+      produces:
+        - application/json
+      operationId: getEvents
+      parameters: 
+        - name: id
+          in: query
+          description: The id of a specific strategy
+          required: true
+          type: string
+      responses:
+        "200":
+          description: A list of events
+          schema: 
+            type: array
+            items:
+              type: string
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags: 
+        - strategy-event
+      security:
+        - api_key: []
+      description: adds a new event to the list of events of a strategy
+      operationId: postEvent
+      parameters:
+        - name: id
+          in: query
+          description: The id of a specific strategy
+          required: true
+          type: string
+        - name: events
+          description: the event that strategy hooks up to
+          in: body
+          required: true
+          schema: 
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: OK - created successfully
+          schema: 
+            $ref: "#/definitions/Strategy"
+  /strategies/backtest:
     x-swagger-router-controller: strategy.controller
     patch:
       tags: 
@@ -148,36 +201,14 @@ definitions:
     required:
       - name
       - description
-      - createdTime
-      - isActive
-      - granularity
       - postedBy
-      - instruments
     properties:
       name:
         type: string
       description:
         type: string
-      createdTime:
-        type: string
-        format: date-time
-      isActive:
-        type: boolean
-      granularity:
-        type: string
-        enum:
-          - M5
-          - M15
-          - M30
-          - H1
-          - H4
-          - D1
       postedBy:
         type: string
-      instruments:
-        type: array
-        items:
-          type: string
   HelloWorldResponse:
     required:
       - message

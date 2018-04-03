@@ -11,7 +11,7 @@ enum StrategyStatusEnum {
     exited,
 }
 export class StrategyBacktestService {
-    private client: redis.RedisClient = redis.createClient();
+    // private client: redis.RedisClient = redis.createClient();
     private snapshots: api.models.StrategySnapshot[] = [];
     private events: api.models.StrategyEvent[] = [];
     private reports: api.models.StrategyBcktestReport[] = [];
@@ -19,28 +19,28 @@ export class StrategyBacktestService {
     private strategyStatus: StrategyStatusEnum;
 
     public async backtest(strategyId: string, instrument: api.enums.InstrumentEnum): Promise<void> {
-        this.client.on('connect', async () => {
-            console.log('redis is ready!');
-            const strategy = await api.models.strategyModel.findById(strategyId);
-            if (strategy === null) {
-                throw new Error('strategy not found!');
+        // this.client.on('connect', async () => {
+        console.log('redis is ready!');
+        const strategy = await api.models.strategyModel.findById(strategyId);
+        if (strategy === null) {
+            throw new Error('strategy not found!');
+        }
+        let stillInLoop = true;
+        let candleTime: Date = new Date('1900-01-01');
+        do {
+
+            const events = await this.getInstrumentEvents(instrument, candleTime, strategy.events);
+
+            for (const event of events) {
+                await this.process(strategy, event);
+                candleTime = event.candleTime;
             }
-            let stillInLoop = true;
-            let candleTime: Date = new Date('1900-01-01');
-            do {
+            stillInLoop = events.length === 0;
+        } while (stillInLoop);
 
-                const events = await this.getInstrumentEvents(instrument, candleTime, strategy.events);
+        await this.saveIntoDb();
 
-                for (const event of events) {
-                    await this.process(strategy, event);
-                    candleTime = event.candleTime;
-                }
-                stillInLoop = events.length === 0;
-            } while (stillInLoop);
-
-            await this.saveIntoDb();
-
-        });
+        // });
     }
 
     private async saveIntoDb() {

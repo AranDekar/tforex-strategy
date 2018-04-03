@@ -10,12 +10,10 @@ class DataAccess {
         // mongoose
         this.mongooseInstance = new mongoose_1.Mongoose();
         this.mongooseInstance.Promise = global.Promise;
-        this.mongooseInstance.connection.once("open", () => {
-            console.log("Conected to mongodb.");
+        this.mongooseInstance.connection.once('open', () => {
+            console.log('Conected to mongodb.');
         });
-        this.mongooseInstance.connect(shared.Config.settings.mongo_db_connection_string, {
-            useMongoClient: true,
-        });
+        this.mongooseInstance.connect(shared.Config.settings.mongo_db_connection_string);
         return this.mongooseInstance;
     }
     constructor() {

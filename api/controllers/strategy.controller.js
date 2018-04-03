@@ -25,12 +25,18 @@ function get(req, res) {
     });
 }
 exports.get = get;
-function post(req, res) {
+function post(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-        const service = new api.services.StrategyService();
-        const model = yield service.create(req.body);
-        res.json(model);
+        try {
+            const service = new api.services.StrategyService();
+            const model = yield service.create(req.body);
+            res.json(model);
+        }
+        catch (err) {
+            res.statusCode = 500; // internal server error
+            next(err);
+        }
     });
 }
 exports.post = post;

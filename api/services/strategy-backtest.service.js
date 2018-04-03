@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const redis = require("redis");
 const api = require("api");
 var StrategyStatusEnum;
 (function (StrategyStatusEnum) {
@@ -18,7 +17,7 @@ var StrategyStatusEnum;
 })(StrategyStatusEnum || (StrategyStatusEnum = {}));
 class StrategyBacktestService {
     constructor() {
-        this.client = redis.createClient();
+        // private client: redis.RedisClient = redis.createClient();
         this.snapshots = [];
         this.events = [];
         this.reports = [];
@@ -26,24 +25,24 @@ class StrategyBacktestService {
     }
     backtest(strategyId, instrument) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.client.on('connect', () => __awaiter(this, void 0, void 0, function* () {
-                console.log('redis is ready!');
-                const strategy = yield api.models.strategyModel.findById(strategyId);
-                if (strategy === null) {
-                    throw new Error('strategy not found!');
+            // this.client.on('connect', async () => {
+            console.log('redis is ready!');
+            const strategy = yield api.models.strategyModel.findById(strategyId);
+            if (strategy === null) {
+                throw new Error('strategy not found!');
+            }
+            let stillInLoop = true;
+            let candleTime = new Date('1900-01-01');
+            do {
+                const events = yield this.getInstrumentEvents(instrument, candleTime, strategy.events);
+                for (const event of events) {
+                    yield this.process(strategy, event);
+                    candleTime = event.candleTime;
                 }
-                let stillInLoop = true;
-                let candleTime = new Date('1900-01-01');
-                do {
-                    const events = yield this.getInstrumentEvents(instrument, candleTime, strategy.events);
-                    for (const event of events) {
-                        yield this.process(strategy, event);
-                        candleTime = event.candleTime;
-                    }
-                    stillInLoop = events.length === 0;
-                } while (stillInLoop);
-                yield this.saveIntoDb();
-            }));
+                stillInLoop = events.length === 0;
+            } while (stillInLoop);
+            yield this.saveIntoDb();
+            // });
         });
     }
     saveIntoDb() {

@@ -13,11 +13,16 @@ export async function get(req, res) {
     }
 }
 
-export async function post(req, res) {
+export async function post(req, res, next) {
     // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-    const service = new api.services.StrategyService();
-    const model = await service.create(req.body);
-    res.json(model);
+    try {
+        const service = new api.services.StrategyService();
+        const model = await service.create(req.body);
+        res.json(model);
+    } catch (err) {
+        res.statusCode = 500; // internal server error
+        next(err);
+    }
 }
 
 export async function backtest(req, res, next) {
