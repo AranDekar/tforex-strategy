@@ -126,15 +126,15 @@ paths:
           description: OK - created successfully
           schema: 
             $ref: "#/definitions/Strategy"
-  /strategies/backtest:
-    x-swagger-router-controller: strategy.controller
-    patch:
+  /strategy/backtests:
+    x-swagger-router-controller: strategy-backtest.controller
+    post:
       tags: 
-        - strategy
+        - strategy-backtest
       security:
         - api_key: []
       description: starts backtesting a strategy
-      operationId: backtest
+      operationId: postBacktest
       parameters:
         - name: instrument
           description: the instrument in which the stratgey is backtested

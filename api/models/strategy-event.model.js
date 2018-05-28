@@ -17,6 +17,7 @@ const schema = new mongoose_1.Schema({
     time: { type: Date },
     event: { type: String },
     payload: { type: mongoose_1.Schema.Types.Mixed },
+    strategyId: { type: mongoose_1.Schema.Types.ObjectId, required: 'strategyId is required' },
 });
 schema.index({ time: 1 }); // schema level ascending index on candleTime
 schema.statics.findUndispatchedBacktestEvents = (topic) => __awaiter(this, void 0, void 0, function* () {

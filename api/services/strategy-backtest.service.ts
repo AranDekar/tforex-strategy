@@ -40,15 +40,18 @@ export class StrategyBacktestService {
         } while (stillInLoop);
         this.produceReport(strategy, instrument);
 
-        await this.saveIntoDb();
+        await this.saveIntoDb(strategyId);
         return numberOfEvents;
         // });
     }
 
-    private async saveIntoDb() {
-        api.models.strategyBacktestSnapshotModel.create(this.snapshots);
-        api.models.strategyBacktestEventModel.create(this.events);
-        api.models.strategyBacktestReportModel.create(this.reports);
+    private async saveIntoDb(strategyId: string) {
+        // api.models.strategyBacktestSnapshotModel.create(this.snapshots);
+        await api.models.strategyBacktestEventModel.find({ strategyId }).remove().exec();
+        await api.models.strategyBacktestEventModel.create(this.events);
+
+        await api.models.strategyBacktestReportModel.find({ strategyId }).remove().exec();
+        await api.models.strategyBacktestReportModel.create(this.reports);
     }
 
     private async publishEvents(tempBacktestTopicName: string): Promise<void> {
@@ -70,7 +73,8 @@ export class StrategyBacktestService {
                     strategyId: strategy.id,
                     instrument: instrumnet,
                     timeIn: event.time,
-                    candleIn: event.payload.close,
+                    priceIn: event.event === StrategyStatusEnum[StrategyStatusEnum.in_buy]
+                        ? event.payload.ask : event.payload.bid,
                     tradeType: event.event,
                 };
                 this.reports.push(report);
@@ -79,11 +83,12 @@ export class StrategyBacktestService {
             } else if (event.event === StrategyStatusEnum[StrategyStatusEnum.exited]) {
                 if (report) {
                     report.timeOut = event.time;
-                    report.candleOut = event.payload.close;
-                    report.pips = report.tradeType === 'long'
-                        ? report.candleOut - report.candleIn
-                        : report.candleIn - report.candleOut;
-                    report.pips = report.pips * 100000;
+                    report.priceOut = report.tradeType === StrategyStatusEnum[StrategyStatusEnum.in_buy] ?
+                        event.payload.ask : event.payload.bid;
+                    report.pips = report.tradeType === StrategyStatusEnum[StrategyStatusEnum.in_buy]
+                        ? report.priceOut - report.priceIn
+                        : report.priceIn - report.priceOut;
+                    report.pips = Number((report.pips * 100000).toFixed(5));
                     // await model.save();
                 }
             }
@@ -115,8 +120,9 @@ export class StrategyBacktestService {
                             bid: instrumentEvent.candleBid,
                             ask: instrumentEvent.candleAsk,
                         },
-                        time: new Date(),
+                        time: instrumentEvent.candleTime,
                         topic: 'test',
+                        strategyId: strategy.id,
                     };
                     this.events.push(eventItem);
                     this.strategyStatus = StrategyStatusEnum.exited;
@@ -132,8 +138,9 @@ export class StrategyBacktestService {
                             bid: instrumentEvent.candleBid,
                             ask: instrumentEvent.candleAsk,
                         },
-                        time: new Date(),
+                        time: instrumentEvent.candleTime,
                         topic: 'test',
+                        strategyId: strategy.id,
                     };
                     this.events.push(eventItem);
                     this.strategyStatus = StrategyStatusEnum.in_buy;
@@ -149,7 +156,8 @@ export class StrategyBacktestService {
                             bid: instrumentEvent.candleBid,
                             ask: instrumentEvent.candleAsk,
                         },
-                        time: new Date(),
+                        time: instrumentEvent.candleTime,
+                        strategyId: strategy.id,
                         topic: 'test',
                     };
                     this.events.push(eventItem);

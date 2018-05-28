@@ -9,29 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const api = require("../../api");
-function get(req, res) {
+function postBacktest(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-        // let _id = req.swagger.params._id.value;
+        const instrument = req.swagger.params.instrument.value;
+        const strategy = req.swagger.params.strategy.value;
         try {
-            const result = [];
-            const service = new api.services.StrategyService();
-            const data = yield service.getAll();
-            res.json(data);
-        }
-        catch (err) {
-            throw new Error(err);
-        }
-    });
-}
-exports.get = get;
-function post(req, res, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-        try {
-            const service = new api.services.StrategyService();
-            const model = yield service.create(req.body);
-            res.json(model);
+            const backtestService = new api.services.StrategyBacktestService();
+            const numberOfEvents = yield backtestService.backtest(strategy, instrument);
+            res.status(200).send({ message: `${numberOfEvents} events are being processed to backtest the strategy` });
         }
         catch (err) {
             res.statusCode = 400; // bad request
@@ -39,5 +24,5 @@ function post(req, res, next) {
         }
     });
 }
-exports.post = post;
-//# sourceMappingURL=strategy.controller.js.map
+exports.postBacktest = postBacktest;
+//# sourceMappingURL=strategy-backtest.controller.js.map

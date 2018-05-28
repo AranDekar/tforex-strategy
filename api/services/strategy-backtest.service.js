@@ -44,16 +44,18 @@ class StrategyBacktestService {
                 stillInLoop = events.length !== 0;
             } while (stillInLoop);
             this.produceReport(strategy, instrument);
-            yield this.saveIntoDb();
+            yield this.saveIntoDb(strategyId);
             return numberOfEvents;
             // });
         });
     }
-    saveIntoDb() {
+    saveIntoDb(strategyId) {
         return __awaiter(this, void 0, void 0, function* () {
-            api.models.strategyBacktestSnapshotModel.create(this.snapshots);
-            api.models.strategyBacktestEventModel.create(this.events);
-            api.models.strategyBacktestReportModel.create(this.reports);
+            // api.models.strategyBacktestSnapshotModel.create(this.snapshots);
+            yield api.models.strategyBacktestEventModel.find({ strategyId }).remove().exec();
+            yield api.models.strategyBacktestEventModel.create(this.events);
+            yield api.models.strategyBacktestReportModel.find({ strategyId }).remove().exec();
+            yield api.models.strategyBacktestReportModel.create(this.reports);
         });
     }
     publishEvents(tempBacktestTopicName) {
@@ -72,7 +74,8 @@ class StrategyBacktestService {
                     strategyId: strategy.id,
                     instrument: instrumnet,
                     timeIn: event.time,
-                    candleIn: event.payload.close,
+                    priceIn: event.event === StrategyStatusEnum[StrategyStatusEnum.in_buy]
+                        ? event.payload.ask : event.payload.bid,
                     tradeType: event.event,
                 };
                 this.reports.push(report);
@@ -82,11 +85,12 @@ class StrategyBacktestService {
             else if (event.event === StrategyStatusEnum[StrategyStatusEnum.exited]) {
                 if (report) {
                     report.timeOut = event.time;
-                    report.candleOut = event.payload.close;
-                    report.pips = report.tradeType === 'long'
-                        ? report.candleOut - report.candleIn
-                        : report.candleIn - report.candleOut;
-                    report.pips = report.pips * 100000;
+                    report.priceOut = report.tradeType === StrategyStatusEnum[StrategyStatusEnum.in_buy] ?
+                        event.payload.ask : event.payload.bid;
+                    report.pips = report.tradeType === StrategyStatusEnum[StrategyStatusEnum.in_buy]
+                        ? report.priceOut - report.priceIn
+                        : report.priceIn - report.priceOut;
+                    report.pips = Number((report.pips * 100000).toFixed(5));
                     // await model.save();
                 }
             }
@@ -109,8 +113,9 @@ class StrategyBacktestService {
                         event: StrategyStatusEnum[StrategyStatusEnum.exited],
                         isDispatched: false,
                         payload: Object.assign({}, this.strategyPayload, { bid: instrumentEvent.candleBid, ask: instrumentEvent.candleAsk }),
-                        time: new Date(),
+                        time: instrumentEvent.candleTime,
                         topic: 'test',
+                        strategyId: strategy.id,
                     };
                     this.events.push(eventItem);
                     this.strategyStatus = StrategyStatusEnum.exited;
@@ -121,8 +126,9 @@ class StrategyBacktestService {
                         event: StrategyStatusEnum[StrategyStatusEnum.in_buy],
                         isDispatched: false,
                         payload: Object.assign({}, this.strategyPayload, { bid: instrumentEvent.candleBid, ask: instrumentEvent.candleAsk }),
-                        time: new Date(),
+                        time: instrumentEvent.candleTime,
                         topic: 'test',
+                        strategyId: strategy.id,
                     };
                     this.events.push(eventItem);
                     this.strategyStatus = StrategyStatusEnum.in_buy;
@@ -133,7 +139,8 @@ class StrategyBacktestService {
                         event: StrategyStatusEnum[StrategyStatusEnum.in_sell],
                         isDispatched: false,
                         payload: Object.assign({}, this.strategyPayload, { bid: instrumentEvent.candleBid, ask: instrumentEvent.candleAsk }),
-                        time: new Date(),
+                        time: instrumentEvent.candleTime,
+                        strategyId: strategy.id,
                         topic: 'test',
                     };
                     this.events.push(eventItem);

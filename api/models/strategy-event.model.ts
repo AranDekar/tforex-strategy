@@ -9,6 +9,7 @@ export interface StrategyEvent {
     time: Date;
     event: string;
     payload: any;
+    strategyId: string | number;
 }
 export interface StrategyEventDocument extends Document, StrategyEvent { }
 export interface StrategyEventDocumentOperations extends Model<StrategyEventDocument> {
@@ -24,6 +25,7 @@ const schema = new Schema({
     time: { type: Date },
     event: { type: String },
     payload: { type: Schema.Types.Mixed },
+    strategyId: { type: Schema.Types.ObjectId, required: 'strategyId is required' },
 });
 
 schema.index({ time: 1 }); // schema level ascending index on candleTime
