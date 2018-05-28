@@ -68,7 +68,7 @@ class RaisingCandles {
     execute(payload, instrumentEvent, exit, buy, sell) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
-                if (instrumentEvent.event === enums_1.InstrumentEventEnum.h4_line_break_closed) {
+                if (instrumentEvent.event === enums_1.InstrumentEventEnum[enums_1.InstrumentEventEnum.h4_line_break_closed]) {
                     if (instrumentEvent.payload.number === 1) {
                         exit();
                         if (instrumentEvent.payload.color === 'red') {

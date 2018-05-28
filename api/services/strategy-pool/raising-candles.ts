@@ -68,7 +68,7 @@ export class RaisingCandles {
         exit: () => void, buy: () => void, sell: () => void):
         Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            if (instrumentEvent.event === InstrumentEventEnum.h4_line_break_closed) {
+            if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_line_break_closed]) {
                 if (instrumentEvent.payload.number === 1) {
                     exit();
                     if (instrumentEvent.payload.color === 'red') {

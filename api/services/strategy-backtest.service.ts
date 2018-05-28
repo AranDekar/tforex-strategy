@@ -18,7 +18,7 @@ export class StrategyBacktestService {
     private strategyPayload: any = {};
     private strategyStatus: StrategyStatusEnum;
 
-    public async backtest(strategyId: string, instrument: api.enums.InstrumentEnum): Promise<void> {
+    public async backtest(strategyId: string, instrument: api.enums.InstrumentEnum): Promise<number> {
         // this.client.on('connect', async () => {
         console.log('redis is ready!');
         const strategy = await api.models.strategyModel.findById(strategyId);
@@ -27,19 +27,21 @@ export class StrategyBacktestService {
         }
         let stillInLoop = true;
         let candleTime: Date = new Date('1900-01-01');
+        let numberOfEvents = 0;
         do {
 
-            const events = await this.getInstrumentEvents(instrument, candleTime, strategy.events);
-
+            const events = await this.getInstrumentEvents(instrument, candleTime, strategy.events.map((x) => x));
+            numberOfEvents += events.length;
             for (const event of events) {
                 await this.process(strategy, event);
                 candleTime = event.candleTime;
             }
-            stillInLoop = events.length === 0;
+            stillInLoop = events.length !== 0;
         } while (stillInLoop);
+        this.produceReport(strategy, instrument);
 
         await this.saveIntoDb();
-
+        return numberOfEvents;
         // });
     }
 
@@ -54,48 +56,38 @@ export class StrategyBacktestService {
         producer.publish(this.events);
     }
 
-    private subscribeToBacktestTopicToHandleEvents(
+    private produceReport(
         strategy: api.models.StrategyDocument,
-        instrumnet: api.enums.InstrumentEnum,
-        tempBacktestTopicName: string, count) {
-        const strategyBacktestConsumer = new api.proxies.StrategyBacktestConsumerProxy(tempBacktestTopicName);
-        // let model;
+        instrumnet: api.enums.InstrumentEnum) {
+
         let report;
         const totalPips = 0;
-        return new Promise((resolve, reject) => {
-            strategyBacktestConsumer.subscribe(count).subscribe(async (events) => {
-                for (const event of events) {
-                    if (event.event === 'long' || event.event === 'short') {
+        for (const event of this.events) {
+            if (event.event === StrategyStatusEnum[StrategyStatusEnum.in_buy] ||
+                event.event === StrategyStatusEnum[StrategyStatusEnum.in_sell]) {
 
-                        report = {
-                            strategyId: strategy.id,
-                            instrument: instrumnet,
-                            topic: tempBacktestTopicName,
-                            timeIn: event.time,
-                            candleIn: event.payload.close,
-                            tradeType: event.event,
-                        };
-                        this.reports.push(report);
-                        // let reportModel = new api.models.strategyBacktestReportModel(report);
-                        // model = await reportModel.save();
-                    } else if (event.event === 'out') {
-                        if (report) {
-                            report.timeOut = event.time;
-                            report.candleOut = event.payload.close;
-                            report.pips = report.tradeType === 'long'
-                                ? report.candleOut - report.candleIn
-                                : report.candleIn - report.candleOut;
-                            report.pips = report.pips * 100000;
-                            // await model.save();
-                        }
-                    }
+                report = {
+                    strategyId: strategy.id,
+                    instrument: instrumnet,
+                    timeIn: event.time,
+                    candleIn: event.payload.close,
+                    tradeType: event.event,
+                };
+                this.reports.push(report);
+                // let reportModel = new api.models.strategyBacktestReportModel(report);
+                // model = await reportModel.save();
+            } else if (event.event === StrategyStatusEnum[StrategyStatusEnum.exited]) {
+                if (report) {
+                    report.timeOut = event.time;
+                    report.candleOut = event.payload.close;
+                    report.pips = report.tradeType === 'long'
+                        ? report.candleOut - report.candleIn
+                        : report.candleIn - report.candleOut;
+                    report.pips = report.pips * 100000;
+                    // await model.save();
                 }
-                resolve(true);
-            }, (error) => {
-                console.error(error);
-                reject(error);
-            });
-        });
+            }
+        }
     }
 
     private async getInstrumentEvents(

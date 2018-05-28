@@ -14,7 +14,7 @@ export class Config {
             this.settings = {
                 gateway_base_path: 'http://localhost:10020',
                 strategies_base_path: 'http://localhost:10030/strategies',
-                instruments_base_path: 'http://127.0.0.1:10040/instruments',
+                instruments_base_path: 'http://instrument:10040',
                 mongo_db_connection_string: process.env.MONGO || `mongodb://mongodb/tss`,
                 api_key: '1234',
                 kafka_conn_string: process.env.KAFKA || 'kafka:9092',

@@ -46,12 +46,12 @@ function backtest(req, res, next) {
         const strategy = req.swagger.params.strategy.value;
         try {
             const backtestService = new api.services.StrategyBacktestService();
-            yield backtestService.backtest(strategy, instrument);
-            res.status(200).send({ message: 'backtesting strategy' });
+            const numberOfEvents = yield backtestService.backtest(strategy, instrument);
+            res.status(200).send({ message: `${numberOfEvents} events are being processed to backtest the strategy` });
         }
         catch (err) {
-            res.statusCode = 500; // internal server error
-            next(err);
+            res.statusCode = 400; // bad request
+            res.json({ message: err.message });
         }
     });
 }

@@ -143,8 +143,10 @@ paths:
           type: string
           enum:
             - AUD_USD
+            - GBP_USD
+            - EUR_USD
         - name: strategy
-          description: the strategy to be backtested
+          description: the id of the strategy to be backtested
           type: string
           in: query
           required: true
