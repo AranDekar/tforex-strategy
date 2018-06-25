@@ -1,12 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const kafka = require("kafka-node");
 const rx = require("rxjs");
@@ -16,7 +8,7 @@ class StrategyBacktestConsumerProxy {
         this.topicName = topicName;
     }
     createTopic() {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        return new Promise(async (resolve, reject) => {
             const client = new kafka.KafkaClient({
                 kafkaHost: api.shared.Config.settings.kafka_conn_string,
             });
@@ -31,7 +23,7 @@ class StrategyBacktestConsumerProxy {
                     resolve(true);
                 });
             });
-        }));
+        });
     }
     // public retrieveEventsFromOffset(offset): Promise<api.models.StrategyEventDocument[]> {
     //     let events: api.models.StrategyEventDocument[] = [];
@@ -87,7 +79,7 @@ class StrategyBacktestConsumerProxy {
                 autoCommit: true,
                 fromOffset: true,
             });
-            consumer.on('message', (message) => __awaiter(this, void 0, void 0, function* () {
+            consumer.on('message', async (message) => {
                 if (message && message.value) {
                     const item = JSON.parse(message.value);
                     items.push(item);
@@ -97,7 +89,7 @@ class StrategyBacktestConsumerProxy {
                     x.next(items);
                     items = [];
                 }
-            }));
+            });
             consumer.on('error', (err) => {
                 console.log(err);
                 x.error(err);

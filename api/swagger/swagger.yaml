@@ -135,32 +135,70 @@ paths:
         - api_key: []
       description: starts backtesting a strategy
       operationId: postBacktest
+      consumes:
+        - application/octet-stream
       parameters:
-        - name: instrument
-          description: the instrument in which the stratgey is backtested
-          in: query
-          required: true
-          type: string
-          enum:
-            - AUD_USD
-            - GBP_USD
-            - EUR_USD
-        - name: strategy
-          description: the id of the strategy to be backtested
+        - name: strategyRevisionId
+          description: the revision of the strategy to test
           type: string
           in: query
           required: true
-        - name: payload
-          description: the payload which contains a description for the backtest
-          in: body
+      responses:
+        "200":
+          description: Success
           schema:
-            type: object
-            properties:
-              description:
-                type: string
-                description: a description for the backtest
-                example: testing with RSA added to the strategy
-              
+            $ref: "#/definitions/EventResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /strategy/revisions:
+    x-swagger-router-controller: strategy-revision.controller
+    post:
+      tags: 
+        - strategy-revision
+      security:
+        - api_key: []
+      description: adding a new revision to the strategy a new revision has a code to compile (the algorithm) 
+                    and will be given a new auto incremental number
+      operationId: postRevision
+      parameters:
+        - name: revision
+          description: the new revision to post
+          in: body
+          required: true
+          schema: 
+            $ref: "#/definitions/StrategyRevision"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EventResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /strategy/revisions/{id}:
+    x-swagger-router-controller: strategy-revision.controller
+    put:
+      tags: 
+        - strategy-revision
+      security:
+        - api_key: []
+      description: updating an existing revision to the strategym a revision has a code to compile which is mostly 
+        being updated
+      operationId: putRevision
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: revision
+          description: the new revision to post
+          in: body
+          required: true
+          schema: 
+            $ref: "#/definitions/StrategyRevision"
       responses:
         "200":
           description: Success
@@ -211,6 +249,24 @@ definitions:
         type: string
       postedBy:
         type: string
+  StrategyRevision:
+    type: object
+    required:
+      - strategy
+      - code
+    properties:
+      id:
+        type: string
+        description: the id of the strategyRevision
+      strategy:
+        type: string
+        description: this is the ref key to the parent strategy object the owner strategy
+      number:
+        type: number
+        description: this is the new number of the revision, this is not meant to be posted by the caller
+      code:
+        type: string
+        description: the algorithm of the strategy in new revision this is a moduel in javascript
   HelloWorldResponse:
     required:
       - message

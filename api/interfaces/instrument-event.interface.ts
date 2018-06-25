@@ -1,11 +1,11 @@
 import { InstrumentEventEnum } from '../enums';
 
 export interface InstrumentEvent {
-    event: string;
-    eventTime: Date;
+    name: string;
+    time: Date;
     candleTime: Date;
-    candleBid: number;
-    candleAsk: number;
+    bidPrice: number;
+    askPrice: number;
     isDispatched: boolean;
-    payload: any;
+    context: {};
 }

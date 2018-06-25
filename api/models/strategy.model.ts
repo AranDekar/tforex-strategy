@@ -10,6 +10,7 @@ export interface Strategy {
     createdTime: string;
     postedBy: string | number;
     events: InstrumentEventEnum[];
+    strategyRevisions: api.models.StrategyRevision[];
 }
 
 export interface StrategyDocument extends Strategy, Document {
@@ -77,6 +78,7 @@ const schema = new Schema({
             'h1_line_break_ema_changed', 'h4_line_break_ema_changed', 'd_line_break_ema_changed',
         ],
     },
+    strategyRevisions: [{ type: Schema.Types.ObjectId, ref: 'strategy_revisions' }],
 });
 
-export let strategyModel = mongoose.model<StrategyDocument>('strategy', schema);
+export let strategyModel = mongoose.model<StrategyDocument>('strategies', schema);

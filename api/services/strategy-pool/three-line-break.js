@@ -1,21 +1,48 @@
-
-import * as api from '../../../api';
-import { InstrumentEventEnum } from '../../enums';
-
-export class RaisingCandles {
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class ThreeLineBreak {
+    constructor() {
+        this.raisingCount = 0;
+        this.idleCount = 0;
+        this.inTradeStatus = 'out';
+        // good for all after 2018
+        // public async execute(
+        //     payload: any, instrumentEvent: api.interfaces.InstrumentEvent,
+        //     exit: () => void, buy: () => void, sell: () => void, info: () => void): Promise<void> {
+        //     return new Promise<void>((resolve, reject) => {
+        //         if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_sma_changed]) {
+        //             if (instrumentEvent.payload.period === 20) {
+        //                 payload.sma = instrumentEvent.payload.result;
+        //             }
+        //             // info();
+        //         } else if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_ema_changed]) {
+        //             if (instrumentEvent.payload.period === 20) {
+        //                 payload.ema = instrumentEvent.payload.result;
+        //             }
+        //             // info();
+        //         } else if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_line_break_closed]) {
+        //             // payload.number = instrumentEvent.payload.number;
+        //             if (instrumentEvent.payload.number === 1) {
+        //                 exit();
+        //                 if (payload.number >= 3) {
+        //                     if (instrumentEvent.payload.color === 'red') {
+        //                         buy();
+        //                     } else {
+        //                         sell();
+        //                     }
+        //                 }
+        //             }
+        //             payload.number = instrumentEvent.payload.number;
+        //         }
+        //         resolve();
+        //     });
+        // }
+        this.toPips = (pips) => Number((pips * 100000).toFixed(5));
+    }
     get SnapshotPayload() {
         return this.snapshotPayload;
     }
-    private snapshotPayload;
-
-    private raisingCount = 0;
-    private idleCount = 0;
-    private lastRaisingCandle;
-    private inTradeStatus = 'out';
-    private time;
-
-    public replay(snapshot: api.models.StrategySnapshot | null, events: api.models.StrategyEvent[]) {
+    replay(snapshot, events) {
         if (snapshot) {
             this.lastRaisingCandle = snapshot.payload.lastRaisingCandle;
             this.raisingCount = snapshot.payload.raisingCount;
@@ -27,27 +54,27 @@ export class RaisingCandles {
             if (event.event === 'up' || event.event === 'long') {
                 this.raisingCount++;
                 this.idleCount = 0;
-
                 if (event.event === 'long') {
                     this.inTradeStatus = 'long';
                 }
-            } else if (event.event === 'down' || event.event === 'short') {
+            }
+            else if (event.event === 'down' || event.event === 'short') {
                 this.raisingCount++;
                 this.idleCount = 0;
-
                 if (event.event === 'short') {
                     this.inTradeStatus = 'short';
                 }
-            } else if (event.event === 'change' || event.event === 'out') {
+            }
+            else if (event.event === 'change' || event.event === 'out') {
                 this.raisingCount = 0;
                 this.idleCount = 0;
-
                 this.inTradeStatus = 'out';
-            } else if (event.event === 'idle') {
+            }
+            else if (event.event === 'idle') {
                 this.idleCount++;
             }
             this.lastRaisingCandle = event.payload;
-            this.time = event.time;
+            this.time = event.candleTime;
         }
         if (events.length >= 10) {
             return {
@@ -62,45 +89,59 @@ export class RaisingCandles {
         }
         return null;
     }
-
-    public async execute(
-        payload: any, instrumentEvent: api.interfaces.InstrumentEvent,
-        exit: () => void, buy: () => void, sell: () => void):
-        Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_line_break_closed]) {
-                if (instrumentEvent.payload.number === 1) {
-                    exit();
-                    if (instrumentEvent.payload.color === 'red') {
-                        sell();
-                    } else {
-                        buy();
-                    }
-                }
-            }
-            resolve();
-        });
-    }
-
-    public processCandle(candle: api.interfaces.Candle): Promise<{ event: string, payload: any }> {
-        let result: { event: string, payload: any } = { event: '', payload: null };
+    // good for audusd and eurusd
+    // public async execute(
+    //     payload: any, instrumentEvent: api.interfaces.InstrumentEvent,
+    //     exit: () => void, buy: () => void, sell: () => void, info: () => void): Promise<void> {
+    //     return new Promise<void>((resolve, reject) => {
+    //         if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_line_break_sma_changed]) {
+    //             if (instrumentEvent.payload.period === 20) {
+    //                 payload.sma = instrumentEvent.payload.result;
+    //             }
+    //             // info();
+    //         } else if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_ema_changed]) {
+    //             if (instrumentEvent.payload.period === 20) {
+    //                 payload.ema = instrumentEvent.payload.result;
+    //             }
+    //             // info();
+    //         } else if (instrumentEvent.event === InstrumentEventEnum[InstrumentEventEnum.h4_line_break_closed]) {
+    //             payload.number = instrumentEvent.payload.number;
+    //             if (instrumentEvent.payload.number === 1) {
+    //                 exit();
+    //             } else if (instrumentEvent.payload.number === 3) {
+    //                 if (instrumentEvent.payload.color === 'red' &&
+    //                     this.toPips(payload.sma - instrumentEvent.candleBid) > 500) {
+    //                     buy();
+    //                 } else if (instrumentEvent.payload.color === 'white' &&
+    //                     this.toPips(instrumentEvent.candleAsk - payload.sma) > 500) {
+    //                     sell();
+    //                 }
+    //             } else {
+    //                 // info();
+    //             }
+    //         }
+    //         resolve();
+    //     });
+    // }
+    processCandle(candle) {
+        let result = { event: '', payload: null };
         return new Promise((resolve, reject) => {
             // the new candle is processed here and if necessary a new event is generated/returned
-            const calcVariance = (value: number) => Number(value.toFixed(5));
-
+            const calcVariance = (value) => Number(value.toFixed(5));
             if (!this.lastRaisingCandle) {
                 const variance = calcVariance(candle.closeBid - candle.openBid);
-
                 if (variance === 0) {
                     result = { event: `idle`, payload: null };
-                } else if (variance > 0) {
+                }
+                else if (variance > 0) {
                     this.lastRaisingCandle = {
                         variance,
                         open: candle.openBid,
                         close: candle.closeBid,
                     };
                     result = { event: `up`, payload: this.lastRaisingCandle };
-                } else {
+                }
+                else {
                     this.lastRaisingCandle = {
                         variance,
                         open: candle.openBid,
@@ -108,12 +149,14 @@ export class RaisingCandles {
                     };
                     result = { event: `down`, payload: this.lastRaisingCandle };
                 }
-            } else {
+            }
+            else {
                 if (this.lastRaisingCandle.variance > 0) {
                     let variance = calcVariance(candle.closeBid - this.lastRaisingCandle.close);
                     if (variance === 0) {
                         result = { event: `idle`, payload: this.lastRaisingCandle };
-                    } else if (variance > 0) {
+                    }
+                    else if (variance > 0) {
                         this.lastRaisingCandle = {
                             variance,
                             open: this.lastRaisingCandle.close,
@@ -121,16 +164,19 @@ export class RaisingCandles {
                         };
                         if (this.raisingCount === 2) {
                             result = { event: `long`, payload: this.lastRaisingCandle };
-                        } else {
+                        }
+                        else {
                             result = { event: `up`, payload: this.lastRaisingCandle };
                         }
-                    } else {
+                    }
+                    else {
                         variance = calcVariance(candle.closeBid - this.lastRaisingCandle.open);
                         if (variance >= -0.00004) {
                             // candle is closed within the range of the last raising candle
                             // so this is nothing to pay attention to
                             result = { event: `idle`, payload: this.lastRaisingCandle };
-                        } else {
+                        }
+                        else {
                             // this is changing the trend (up to down)
                             this.lastRaisingCandle = {
                                 variance,
@@ -139,44 +185,49 @@ export class RaisingCandles {
                             };
                             if (this.inTradeStatus !== 'out') {
                                 result = { event: `out`, payload: this.lastRaisingCandle };
-                            } else {
+                            }
+                            else {
                                 result = { event: `change`, payload: this.lastRaisingCandle };
                             }
                         }
                     }
-                } else { // last candle variance was negative so a down trending candle
+                }
+                else { // last candle variance was negative so a down trending candle
                     let variance = calcVariance(candle.closeBid - this.lastRaisingCandle.close);
                     if (variance === 0) {
                         result = { event: `idle`, payload: this.lastRaisingCandle };
-                    } else if (variance < 0) {
+                    }
+                    else if (variance < 0) {
                         this.lastRaisingCandle = {
                             variance,
                             open: this.lastRaisingCandle.close,
                             close: candle.closeBid,
                         };
-
                         if (this.raisingCount === 2) {
                             result = { event: `short`, payload: this.lastRaisingCandle };
-                        } else {
+                        }
+                        else {
                             result = { event: `down`, payload: this.lastRaisingCandle };
                         }
-                    } else {
+                    }
+                    else {
                         variance = calcVariance(candle.closeBid - this.lastRaisingCandle.open);
                         if (variance <= 0.00004) {
                             // candle is closed within the range of the last raising candle
                             // so this is nothing to pay attention to
                             result = { event: `idle`, payload: this.lastRaisingCandle };
-                        } else {
+                        }
+                        else {
                             // this is changing the trend (up to down)
                             this.lastRaisingCandle = {
                                 variance,
                                 open: this.lastRaisingCandle.open,
                                 close: candle.closeBid,
                             };
-
                             if (this.inTradeStatus !== 'out') {
                                 result = { event: `out`, payload: this.lastRaisingCandle };
-                            } else {
+                            }
+                            else {
                                 result = { event: `change`, payload: this.lastRaisingCandle };
                             }
                         }
@@ -187,3 +238,5 @@ export class RaisingCandles {
         });
     }
 }
+exports.ThreeLineBreak = ThreeLineBreak;
+//# sourceMappingURL=three-line-break.js.map

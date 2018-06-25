@@ -48,6 +48,7 @@ const schema = new mongoose_1.Schema({
             'h1_line_break_ema_changed', 'h4_line_break_ema_changed', 'd_line_break_ema_changed',
         ],
     },
+    strategyRevisions: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'strategy_revisions' }],
 });
-exports.strategyModel = mongoose.model('strategy', schema);
+exports.strategyModel = mongoose.model('strategies', schema);
 //# sourceMappingURL=strategy.model.js.map

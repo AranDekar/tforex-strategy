@@ -4,8 +4,7 @@ const mongoose_1 = require("mongoose");
 const api = require("../../api");
 const mongoose = api.shared.DataAccess.mongooseInstance;
 const schema = new mongoose_1.Schema({
-    strategyId: { type: mongoose_1.Schema.Types.ObjectId, required: 'strategyId is required' },
-    sessionId: { type: mongoose_1.Schema.Types.ObjectId, required: 'sessionId is required' },
+    strategyRevision: { type: mongoose_1.Schema.Types.ObjectId, ref: 'strategy_revisions' },
     instrument: { type: String, required: 'instrumentId is required' },
     timeIn: Date,
     timeOut: Date,
@@ -15,5 +14,5 @@ const schema = new mongoose_1.Schema({
     pips: { type: Number },
     payload: { type: mongoose_1.Schema.Types.Mixed },
 });
-exports.strategyBacktestReportModel = mongoose.model('strategy_backtest_report', schema);
-//# sourceMappingURL=strategy-backtest-report.model.js.map
+exports.strategyReportModel = mongoose.model('strategy_reports', schema);
+//# sourceMappingURL=strategy-report.model.js.map

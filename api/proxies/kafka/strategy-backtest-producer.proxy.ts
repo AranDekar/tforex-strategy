@@ -15,8 +15,7 @@ export class StrategyBacktestProducerProxy {
         if (events) {
             dispatched = events;
         } else {
-            dispatched = await api.models.strategyBacktestEventModel.findUndispatchedBacktestEvents(
-                this.topic);
+            dispatched = [];
         }
         if (dispatched.length === 0) {
             console.log('no backtest event to publish!');

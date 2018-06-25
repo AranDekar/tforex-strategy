@@ -34,6 +34,6 @@ schema.statics.findLastLiveSnapshot = async (topic: string) => {
 };
 
 export const strategyLiveSnapshotModel = mongoose.model<StrategySnapshotDocument>(
-    'strategy_live_snapshot', schema) as StrategySnapshotDocumentOperations;
+    'strategy_live_snapshots', schema) as StrategySnapshotDocumentOperations;
 export const strategyBacktestSnapshotModel = mongoose.model<StrategySnapshotDocument>(
-    'strategy_backtest_snapshot', schema) as StrategySnapshotDocumentOperations;
+    'strategy_backtest_snapshots', schema) as StrategySnapshotDocumentOperations;
